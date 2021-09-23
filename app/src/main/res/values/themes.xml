@@ -1,0 +1,112 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.AmazonIVSBroadcast" parent="Theme.MaterialComponents.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/broadcast_primary_bg_color</item>
+        <item name="colorPrimaryVariant">@color/broadcast_secondary_bg_color</item>
+        <item name="colorOnPrimary">@color/broadcast_white_color</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/broadcast_secondary_bg_color</item>
+        <item name="colorSecondaryVariant">@color/broadcast_white_color</item>
+        <item name="colorOnSecondary">@color/broadcast_primary_accent_color</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/broadcast_primary_bg_color</item>
+        <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@color/broadcast_primary_bg_color</item>
+    </style>
+
+    <!-- Text -->
+    <style name="TextStylePrimary" parent="Theme.AmazonIVSBroadcast">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/broadcast_white_color</item>
+        <item name="android:fontFamily">@font/amazon_ember_bold</item>
+        <item name="android:lineSpacingMultiplier">1.25</item>
+    </style>
+
+    <style name="TextStyleSecondary" parent="TextStylePrimary">
+        <item name="android:fontFamily">@font/amazon_ember</item>
+    </style>
+
+    <style name="TextStyleTertiary" parent="TextStyleSecondary">
+        <item name="android:textColor">@color/broadcast_tertiary_text_color</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:lineSpacingMultiplier">1.24</item>
+    </style>
+
+    <style name="MainActionButton" parent="TextStylePrimary">
+        <item name="android:elevation">5dp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:minHeight">@dimen/broadcast_button_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">@font/amazon_ember</item>
+    </style>
+
+    <style name="MainActionButtonWeak" parent="MainActionButton">
+        <item name="android:textColor">@color/broadcast_yellow_text_color</item>
+        <item name="android:background">@drawable/bg_button_weak</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="MainActionButtonAccented" parent="MainActionButton">
+        <item name="android:textColor">@drawable/state_list_main_button_text_color</item>
+        <item name="android:fontFamily">@font/amazon_ember_bold</item>
+        <item name="android:background">@drawable/state_list_button_color</item>
+    </style>
+
+    <!-- Utility -->
+    <style name="CheckBox" parent="Theme.AmazonIVSBroadcast">
+        <item name="useMaterialThemeColors">false</item>
+        <item name="backgroundTint">@drawable/state_list_checkbox_color</item>
+        <item name="android:button">@null</item>
+        <item name="android:background">?android:attr/listChoiceIndicatorMultiple</item>
+    </style>
+
+    <style name="Widget.App.RadioButton" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
+        <item name="buttonTint">@color/radio_button_color</item>
+    </style>
+
+    <style name="EditText" parent="Theme.AmazonIVSBroadcast">
+        <item name="android:inputType">text</item>
+        <item name="android:textColor">@color/broadcast_white_color</item>
+        <item name="android:theme">@style/InputCursor</item>
+        <item name="android:textColorHint">@color/broadcast_tertiary_text_color</item>
+        <item name="backgroundTint">@color/broadcast_primary_accent_color</item>
+    </style>
+
+    <style name="InputCursor" parent="">
+        <item name="android:colorControlActivated">@color/broadcast_white_color</item>
+    </style>
+
+    <style name="Switch" parent="Theme.AmazonIVSBroadcast">
+        <item name="trackTint">@color/switch_track_state_list</item>
+        <item name="thumbTint">@color/switch_thumb_state_list</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <!-- Alert dialog -->
+    <style name="AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="android:backgroundTint">@color/broadcast_alert_dialog_background_color</item>
+        <item name="textAppearanceSmallPopupMenu">@color/broadcast_alert_dialog_background_color</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/AlertTitle</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/AlertBody</item>
+        <item name="buttonBarPositiveButtonStyle">@style/AlertButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AlertButtonStyle</item>
+    </style>
+
+    <style name="AlertTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:theme">@style/TextStyleSecondary</item>
+        <item name="android:textColor">@color/broadcast_white_color</item>
+    </style>
+
+    <style name="AlertBody" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:textColor">@color/broadcast_primary_accent_color</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="AlertButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/broadcast_yellow_text_color</item>
+        <item name="rippleColor">@color/broadcast_primary_accent_color</item>
+    </style>
+
+</resources>

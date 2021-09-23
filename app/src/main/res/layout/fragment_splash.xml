@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/broadcast_margin_normal">
+
+        <ImageView
+            android:id="@+id/splash_banner"
+            android:layout_width="64dp"
+            android:layout_height="128dp"
+            android:background="@drawable/bg_banner"
+            android:contentDescription="@string/description_banner"
+            android:padding="12dp"
+            android:src="@drawable/ic_videocam"
+            app:layout_constraintBottom_toTopOf="@id/splash_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/splash_title"
+            style="@style/TextStylePrimary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/broadcast_margin_huge"
+            android:text="@string/splash_title"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@+id/splash_subtitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/splash_banner" />
+
+        <TextView
+            android:id="@id/splash_subtitle"
+            style="@style/TextStyleSecondary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/broadcast_margin_small"
+            android:layout_marginBottom="@dimen/broadcast_margin_big"
+            android:text="@string/splash_subtitle"
+            android:textAlignment="center"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@id/splash_get_started"
+            app:layout_constraintEnd_toEndOf="@id/splash_title"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@id/splash_title"
+            app:layout_constraintTop_toBottomOf="@id/splash_title" />
+
+        <Space
+            android:id="@+id/space"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/splash_get_started"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/splash_subtitle" />
+
+        <TextView
+            android:id="@+id/splash_get_started"
+            style="@style/MainActionButtonAccented"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/broadcast_margin_big"
+            android:layout_marginBottom="@dimen/broadcast_margin_small"
+            android:enabled="true"
+            android:text="@string/get_started"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/space"
+            app:layout_constraintWidth_max="@dimen/main_item_width" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

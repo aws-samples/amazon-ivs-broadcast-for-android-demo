@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_splash">
+
+    <fragment
+        android:id="@+id/navigation_splash"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.splash.SplashFragment"
+        tools:layout="@layout/fragment_splash" />
+
+    <fragment
+        android:id="@+id/navigation_permissions"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.permissions.PermissionsFragment"
+        tools:layout="@layout/fragment_permissions" />
+
+    <fragment
+        android:id="@+id/navigation_configuration_setup"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.configurationsetup.ConfigurationSetupFragment"
+        tools:layout="@layout/fragment_configuration_setup" >
+        <argument
+            android:name="runConfiguration"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_configuration_summary"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.configurationsummary.ConfigurationSummaryFragment"
+        tools:layout="@layout/fragment_configuration_summary" />
+
+    <fragment
+        android:id="@+id/navigation_main"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.main.MainFragment"
+        tools:layout="@layout/fragment_main" />
+
+    <fragment
+        android:id="@+id/navigation_web_view"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.webview.WebViewFragment"
+        tools:layout="@layout/fragment_web" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.settings.settingsfragment.SettingsFragment"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/navigation_stream_graphic_properties"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.settings.graphicpropertiesfragment.GraphicPropertiesFragment"
+        tools:layout="@layout/fragment_graphic_properties" />
+
+    <fragment
+        android:id="@+id/navigation_stream_bitrate_properties"
+        android:name="com.amazon.ivs.broadcast.ui.fragments.settings.networkpropertiesfragment.NetworkPropertiesFragment"
+        tools:layout="@layout/fragment_network_properties" />
+
+</navigation>

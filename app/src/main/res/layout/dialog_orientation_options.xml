@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RadioGroup
+        android:id="@+id/radio_group"
+        style="@style/Widget.App.RadioButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/option_auto"
+        android:padding="@dimen/broadcast_padding_big">
+
+        <RadioButton
+            android:id="@+id/option_auto"
+            style="@style/Widget.App.RadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="@string/auto"
+            android:textColor="@color/broadcast_white_color" />
+
+        <RadioButton
+            android:id="@+id/option_portrait"
+            style="@style/Widget.App.RadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="@string/portrait"
+            android:textColor="@color/broadcast_white_color" />
+
+        <RadioButton
+            android:id="@+id/option_landscape"
+            style="@style/Widget.App.RadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="@string/landscape"
+            android:textColor="@color/broadcast_white_color" />
+
+        <RadioButton
+            android:id="@+id/option_square"
+            style="@style/Widget.App.RadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="@string/square"
+            android:textColor="@color/broadcast_white_color" />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/description"
+        style="@style/TextStyleTertiary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="@dimen/broadcast_margin_normal"
+        android:layout_marginEnd="4dp"
+        android:text="@string/orientation_dialog_description" />
+
+</LinearLayout>

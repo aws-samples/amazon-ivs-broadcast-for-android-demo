@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="com.amazonaws.ivs.broadcast.BroadcastSession.State" />
+
+        <variable
+            name="isStreamOnline"
+            type="Boolean" />
+
+        <variable
+            name="isStreamMuted"
+            type="Boolean" />
+
+        <variable
+            name="isCameraOff"
+            type="Boolean" />
+
+        <variable
+            name="isScreenCaptureOn"
+            type="Boolean" />
+
+        <variable
+            name="useCustomResolution"
+            type="Boolean" />
+
+        <variable
+            name="topBarUpdate"
+            type="com.amazon.ivs.broadcast.models.ui.StreamTopBarModel" />
+
+    </data>
+
+    <androidx.constraintlayout.motion.widget.MotionLayout
+        android:id="@+id/motion_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutDescription="@xml/landscape_menu_scene">
+
+        <LinearLayout
+            android:id="@+id/stream_container_landscape"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/stream_side_bar"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/stream_container_cardview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:cardBackgroundColor="@color/broadcast_transparent"
+                app:cardCornerRadius="16dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <FrameLayout
+                        android:id="@+id/default_slot_container_landscape"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="@{isCameraOff ? View.GONE : View.VISIBLE}"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <LinearLayout
+                        android:id="@+id/camera_off_slot_container_landscape"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:visibility="@{isCameraOff &amp;&amp; !isScreenCaptureOn ? View.VISIBLE : View.INVISIBLE}"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:visibility="visible"
+                        tools:ignore="UseCompoundDrawables">
+
+                        <ImageView
+                            android:id="@+id/camera_off_icon"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:contentDescription="@string/description_camera_toggle"
+                            android:src="@drawable/ic_camera_off" />
+
+                        <TextView
+                            android:id="@+id/camera_off_text"
+                            style="@style/TextStylePrimary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/camera_off_mask_text" />
+
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/stream_status_pill"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/broadcast_margin_normal"
+                        android:layout_marginTop="@dimen/broadcast_margin_normal"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <include
+                            layout="@layout/item_stream_status_pill"
+                            android:visibility="@{topBarUpdate.streamStatus == State.CONNECTED ? View.VISIBLE : View.GONE}"
+                            app:backgroundResource="@{topBarUpdate.pillBackground}"
+                            app:pillText="@{topBarUpdate.formattedTime}"
+                            app:textColor="@{@color/broadcast_white_color}" />
+
+                        <include
+                            layout="@layout/item_stream_status_pill"
+                            android:visibility="@{topBarUpdate.streamStatus == State.CONNECTING ? View.VISIBLE : View.GONE}"
+                            app:backgroundResource="@{topBarUpdate.pillBackground}"
+                            app:pillText="@{@string/connecting}"
+                            app:textColor="@{@color/broadcast_black_text_color}" />
+
+                        <include
+                            layout="@layout/item_stream_status_pill"
+                            android:visibility="@{topBarUpdate.streamStatus == State.DISCONNECTED ? View.VISIBLE : View.GONE}"
+                            app:backgroundResource="@{topBarUpdate.pillBackground}"
+                            app:pillText="@{@string/offline}"
+                            app:textColor="@{@color/broadcast_tertiary_text_color}" />
+
+                    </FrameLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/screen_capture_on"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/broadcast_primary_bg_color"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="@{isScreenCaptureOn ? View.VISIBLE : View.GONE}">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_screen_sharing" />
+
+            <TextView
+                style="@style/TextStylePrimary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/broadcast_margin_big"
+                android:layout_marginBottom="@dimen/broadcast_margin_small"
+                android:text="@string/screen_sharing_active"
+                android:textSize="18sp" />
+
+            <TextView
+                style="@style/TextStyleTertiary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/screensharing_camera_note"
+                android:textAlignment="center"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/stop_screen_share_center_button"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/broadcast_margin_normal"
+                android:background="@drawable/bg_broadcast_rectangle_button"
+                android:elevation="5dp"
+                android:gravity="center"
+                android:paddingStart="@dimen/broadcast_padding_normal"
+                android:paddingTop="@dimen/broadcast_padding_small"
+                android:paddingEnd="@dimen/broadcast_padding_normal"
+                android:paddingBottom="@dimen/broadcast_padding_small"
+                android:text="@string/stop_sharing" />
+
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/landscape_menu_button_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:background="@drawable/bg_broadcast_side_sheet"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/landscape_menu_metadata_holder"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/grab_item"
+                android:layout_width="4dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginStart="@dimen/broadcast_margin_small"
+                app:cardBackgroundColor="@color/broadcast_bottom_sheet_drag_handle_color"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/landscape_menu_buttons"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/landscape_menu_buttons"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                android:layout_marginTop="@dimen/broadcast_margin_small"
+                android:layout_marginEnd="@dimen/broadcast_margin_normal"
+                android:layout_marginBottom="@dimen/broadcast_margin_small"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/grab_item"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/broadcast_mute"
+                    android:layout_width="@dimen/broadcast_controls_button_diameter"
+                    android:layout_height="@dimen/broadcast_controls_button_diameter"
+                    android:background="@{isStreamMuted ? @drawable/bg_broadcast_circle_button_red : @drawable/bg_broadcast_circle_button }"
+                    android:contentDescription="@string/description_mute"
+                    android:elevation="5dp"
+                    android:padding="@dimen/broadcast_padding_small"
+                    android:src="@drawable/ic_muted"
+                    app:tint="@color/broadcast_white_color"
+                    tools:src="@drawable/ic_muted" />
+
+                <TextView
+                    android:id="@+id/broadcast_mute_text"
+                    style="@style/TextStyleTertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/broadcast_margin_small"
+                    android:layout_marginBottom="@dimen/broadcast_margin_small"
+                    android:text="@{isStreamMuted ? @string/unmute : @string/mute}"
+                    tools:text="text" />
+
+                <ImageView
+                    android:id="@+id/broadcast_camera"
+                    android:layout_width="@dimen/broadcast_controls_button_diameter"
+                    android:layout_height="@dimen/broadcast_controls_button_diameter"
+                    android:background="@{isCameraOff ? @drawable/bg_broadcast_circle_button_red : @drawable/bg_broadcast_circle_button }"
+                    android:contentDescription="@string/description_camera_toggle"
+                    android:elevation="5dp"
+                    android:padding="@dimen/broadcast_padding_small"
+                    android:src="@drawable/ic_camera_off"
+                    app:tint="@color/broadcast_white_color" />
+
+                <TextView
+                    android:id="@+id/broadcast_camera_text"
+                    style="@style/TextStyleTertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/broadcast_margin_small"
+                    android:layout_marginBottom="@dimen/broadcast_margin_small"
+                    android:text="@{isCameraOff ?  @string/camera_on : @string/camera_off}"
+                    tools:text="text" />
+
+                <ImageView
+                    android:id="@+id/broadcast_flip"
+                    android:layout_width="@dimen/broadcast_controls_button_diameter"
+                    android:layout_height="@dimen/broadcast_controls_button_diameter"
+                    android:background="@drawable/bg_broadcast_circle_button"
+                    android:contentDescription="@string/description_flip_button"
+                    android:elevation="5dp"
+                    android:padding="@dimen/broadcast_padding_small"
+                    android:src="@drawable/ic_flip"
+                    app:tint="@color/broadcast_white_color" />
+
+                <TextView
+                    android:id="@+id/broadcast_flip_text"
+                    style="@style/TextStyleTertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/broadcast_margin_small"
+                    android:layout_marginBottom="@dimen/broadcast_margin_small"
+                    android:text="@string/flip" />
+
+                <ImageView
+                    android:id="@+id/broadcast_go_live"
+                    android:layout_width="@dimen/broadcast_controls_button_diameter"
+                    android:layout_height="@dimen/broadcast_controls_button_diameter"
+                    android:background="@{isStreamOnline ?  @drawable/bg_end_stream : @drawable/bg_go_live}"
+                    android:contentDescription="@string/description_go_live_button"
+                    android:elevation="5dp"
+                    android:padding="@dimen/broadcast_padding_small"
+                    app:tint="@color/broadcast_white_color"
+                    tools:background="@drawable/bg_go_live" />
+
+                <TextView
+                    android:id="@+id/broadcast_go_live_text"
+                    style="@style/TextStyleTertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/broadcast_margin_small"
+                    android:text="@{isStreamOnline ? @string/end_stream : @string/go_live}"
+                    tools:text="text" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/landscape_menu_metadata_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:background="@color/broadcast_grey_semi_transparent_color"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/share_screen"
+                style="@style/TextStyleSecondary"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/broadcast_button_height"
+                android:layout_marginTop="@dimen/broadcast_margin_normal"
+                android:background="@drawable/bg_broadcast_rectangle_button"
+                android:elevation="5dp"
+                android:gravity="center"
+                android:paddingStart="@dimen/broadcast_padding_huge"
+                android:paddingEnd="@dimen/broadcast_padding_huge"
+                android:text="@string/share_screen"
+                android:visibility="@{isScreenCaptureOn ? View.INVISIBLE : View.VISIBLE}"
+                app:layout_constraintBottom_toTopOf="@id/invite_to_watch"
+                app:layout_constraintEnd_toEndOf="@id/send_metadata"
+                app:layout_constraintStart_toStartOf="@id/invite_to_watch"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/stop_screen_share_menu_button"
+                style="@style/TextStyleSecondary"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/broadcast_button_height"
+                android:layout_marginTop="@dimen/broadcast_margin_normal"
+                android:background="@drawable/bg_broadcast_rectangle_red_button"
+                android:elevation="5dp"
+                android:gravity="center"
+                android:paddingStart="@dimen/broadcast_padding_huge"
+                android:paddingEnd="@dimen/broadcast_padding_huge"
+                android:text="@string/stop_sharing"
+                android:visibility="@{isScreenCaptureOn ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toTopOf="@id/invite_to_watch"
+                app:layout_constraintEnd_toEndOf="@id/send_metadata"
+                app:layout_constraintStart_toStartOf="@id/invite_to_watch"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/invite_to_watch"
+                style="@style/TextStyleSecondary"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/broadcast_button_height"
+                android:layout_marginTop="@dimen/broadcast_margin_normal"
+                android:background="@drawable/bg_broadcast_rectangle_button"
+                android:elevation="5dp"
+                android:gravity="center"
+                android:text="@string/invite_to_watch"
+                app:layout_constraintBottom_toTopOf="@id/separator"
+                app:layout_constraintEnd_toEndOf="@id/send_metadata"
+                app:layout_constraintStart_toStartOf="@id/separator"
+                app:layout_constraintTop_toBottomOf="@id/share_screen" />
+
+            <FrameLayout
+                android:id="@+id/separator"
+                android:layout_width="0dp"
+                android:layout_height="1.5dp"
+                android:layout_marginTop="@dimen/broadcast_margin_big"
+                android:background="@color/broadcast_divider_color"
+                app:layout_constraintBottom_toTopOf="@id/timed_metadata"
+                app:layout_constraintEnd_toEndOf="@id/send_metadata"
+                app:layout_constraintStart_toStartOf="@id/timed_metadata"
+                app:layout_constraintTop_toBottomOf="@id/invite_to_watch" />
+
+            <TextView
+                android:id="@+id/timed_metadata"
+                style="@style/TextStyleTertiary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/broadcast_margin_normal"
+                android:layout_marginBottom="@dimen/broadcast_margin_medium"
+                android:text="@string/timed_metadata"
+                android:textSize="12sp"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@id/sample_event"
+                app:layout_constraintEnd_toEndOf="@id/sample_event_value"
+                app:layout_constraintStart_toStartOf="@id/sample_event"
+                app:layout_constraintTop_toBottomOf="@id/separator" />
+
+            <TextView
+                android:id="@+id/sample_event"
+                style="@style/TextStyleSecondary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/broadcast_margin_tiny"
+                android:gravity="start"
+                android:text="@string/sample_event"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@id/sample_event_value"
+                app:layout_constraintEnd_toEndOf="@id/sample_event_value"
+                app:layout_constraintStart_toStartOf="@id/sample_event_value"
+                app:layout_constraintTop_toBottomOf="@id/timed_metadata" />
+
+            <TextView
+                android:id="@+id/sample_event_value"
+                style="@style/TextStyleTertiary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="36dp"
+                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                android:layout_marginEnd="@dimen/broadcast_margin_big"
+                android:fontFamily="@font/jetbrains_mono"
+                android:text="@string/sample_event_data"
+                android:textColor="@color/broadcast_json_code_color"
+                android:textSize="14sp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@id/send_metadata"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sample_event" />
+
+            <TextView
+                android:id="@+id/send_metadata"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/broadcast_margin_normal"
+                android:background="@drawable/bg_bottom_sheet_send_button"
+                android:gravity="center"
+                android:minWidth="56dp"
+                android:paddingStart="@dimen/broadcast_padding_small"
+                android:paddingTop="@dimen/broadcast_padding_tiny"
+                android:paddingEnd="@dimen/broadcast_padding_small"
+                android:paddingBottom="@dimen/broadcast_padding_tiny"
+                android:text="@string/send"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="@id/sample_event_value"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/sample_event_value"
+                app:layout_constraintTop_toTopOf="@id/sample_event" />
+
+            <ProgressBar
+                android:id="@+id/metadata_progress_bar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_margin="5dip"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/broadcast_primary_accent_color"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/sample_event_value"
+                app:layout_constraintEnd_toEndOf="@id/invite_to_watch"
+                app:layout_constraintTop_toTopOf="@id/sample_event" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <FrameLayout
+            android:id="@+id/landscape_metadata_guide"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/landscape_menu_metadata_holder"
+            app:layout_constraintStart_toStartOf="@id/landscape_menu_metadata_holder"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/landscape_button_guide"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/landscape_menu_button_holder"
+            app:layout_constraintStart_toStartOf="@id/landscape_menu_button_holder"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/mini_preview_container_landscape"
+            android:layout_width="90dp"
+            android:layout_height="160dp"
+            android:layout_marginTop="@dimen/broadcast_margin_medium"
+            android:layout_marginEnd="@dimen/broadcast_margin_big"
+            android:layout_marginBottom="@dimen/broadcast_mini_player_bottom_margin"
+            android:visibility="@{isScreenCaptureOn &amp;&amp; !isCameraOff ? View.VISIBLE : View.GONE}"
+            app:cardBackgroundColor="@color/broadcast_secondary_bg_color"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/landscape_settings_button">
+
+            <FrameLayout
+                android:id="@+id/mini_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/stream_side_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/stream_quality_landscape"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/jetbrains_mono"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/broadcast_margin_medium"
+                android:paddingEnd="@dimen/broadcast_margin_medium"
+                android:textSize="14sp"
+                android:visibility="@{!isStreamOnline ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toTopOf="@id/stream_framerate_landscape"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="720p30" />
+
+            <TextView
+                android:id="@+id/stream_framerate_landscape"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/jetbrains_mono"
+                android:paddingStart="@dimen/broadcast_margin_medium"
+                android:paddingEnd="@dimen/broadcast_margin_medium"
+                android:textSize="12sp"
+                android:visibility="@{useCustomResolution &amp;&amp; !isStreamOnline ? View.VISIBLE : View.GONE}"
+                app:layout_constraintStart_toStartOf="@id/stream_quality_landscape"
+                app:layout_constraintTop_toBottomOf="@id/stream_quality_landscape"
+                tools:text="30"
+                tools:visibility="gone" />
+
+            <TextView
+                android:id="@+id/stream_used_network"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:fontFamily="@font/jetbrains_mono"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/broadcast_margin_medium"
+                android:paddingEnd="@dimen/broadcast_margin_medium"
+                android:text="@{topBarUpdate.formattedNetwork}"
+                android:textSize="14sp"
+                android:visibility="@{topBarUpdate.streamOnline ? View.VISIBLE : View.GONE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/landscape_settings_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/settings"
+                android:padding="@dimen/broadcast_padding_medium"
+                android:src="@drawable/ic_settings"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.motion.widget.MotionLayout>
+
+</layout>

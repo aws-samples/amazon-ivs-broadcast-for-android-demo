@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.amazon.ivs.broadcast.models.ui.PopupType" />
+
+        <import type="android.view.View" />
+
+        <variable
+            name="isTestActive"
+            type="Boolean" />
+
+        <variable
+            name="popupUpdate"
+            type="com.amazon.ivs.broadcast.models.ui.PopupModel" />
+
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/broadcast_margin_normal">
+
+            <TextView
+                android:id="@+id/setup_title"
+                style="@style/TextStylePrimary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/broadcast_margin_huge"
+                android:text="@string/configuration_title"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:visibility="@{isTestActive ? View.GONE : View.VISIBLE}"
+                app:layout_constraintBottom_toTopOf="@+id/setup_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:visibility="visible" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/setup_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/broadcast_margin_normal"
+                android:layout_marginBottom="@dimen/broadcast_margin_medium"
+                android:visibility="@{isTestActive ? View.GONE : View.VISIBLE}"
+                app:cardBackgroundColor="@color/broadcast_secondary_grey_color"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="5dp"
+                app:layout_constraintBottom_toTopOf="@id/skip_configuration"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/setup_title"
+                app:layout_constraintWidth_max="@dimen/main_item_width">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/setup_subtitle"
+                        style="@style/TextStyleSecondary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/broadcast_margin_normal"
+                        android:layout_marginTop="@dimen/broadcast_margin_normal"
+                        android:layout_marginEnd="@dimen/broadcast_margin_normal"
+                        android:text="@string/configuration_description"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <FrameLayout
+                        android:id="@+id/setup_first_separator"
+                        android:layout_width="0dp"
+                        android:layout_height="0.5dp"
+                        android:layout_marginTop="@dimen/broadcast_margin_normal"
+                        android:background="@color/broadcast_primary_grey_color"
+                        app:layout_constraintBottom_toTopOf="@id/ingest_server_container"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/setup_subtitle" />
+
+                    <LinearLayout
+                        android:id="@+id/ingest_server_container"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:orientation="vertical"
+                        android:paddingStart="@dimen/broadcast_padding_normal"
+                        android:paddingTop="@dimen/broadcast_padding_small"
+                        android:paddingEnd="@dimen/broadcast_padding_normal"
+                        android:paddingBottom="@dimen/broadcast_padding_small"
+                        app:layout_constraintBottom_toTopOf="@id/setup_second_separator"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/setup_first_separator">
+
+                        <TextView
+                            android:id="@+id/setup_ingest_server"
+                            style="@style/TextStyleSecondary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ingest_server" />
+
+                        <TextView
+                            android:id="@+id/setup_ingest_server_value"
+                            style="@style/TextStyleTertiary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/not_set" />
+
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/setup_second_separator"
+                        android:layout_width="0dp"
+                        android:layout_height="0.5dp"
+                        android:background="@color/broadcast_primary_grey_color"
+                        app:layout_constraintBottom_toTopOf="@id/stream_key_container"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/ingest_server_container" />
+
+                    <LinearLayout
+                        android:id="@+id/stream_key_container"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:orientation="vertical"
+                        android:paddingStart="@dimen/broadcast_padding_normal"
+                        android:paddingTop="@dimen/broadcast_padding_small"
+                        android:paddingEnd="@dimen/broadcast_padding_normal"
+                        android:paddingBottom="@dimen/broadcast_padding_small"
+                        app:layout_constraintBottom_toTopOf="@id/setup_third_separator"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/setup_second_separator">
+
+                        <TextView
+                            android:id="@+id/setup_stream_key"
+                            style="@style/TextStyleSecondary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/stream_key" />
+
+                        <TextView
+                            android:id="@+id/setup_stream_key_value"
+                            style="@style/TextStyleTertiary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/not_set" />
+
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/setup_third_separator"
+                        android:layout_width="0dp"
+                        android:layout_height="0.5dp"
+                        android:background="@color/broadcast_primary_grey_color"
+                        app:layout_constraintBottom_toTopOf="@id/setup_note"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/stream_key_container" />
+
+                    <TextView
+                        android:id="@+id/setup_note"
+                        style="@style/TextStyleTertiary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/broadcast_margin_small"
+                        android:layout_marginBottom="@dimen/broadcast_margin_big"
+                        android:text="@string/create_channel_note"
+                        android:textColorLink="@color/broadcast_primary_accent_color"
+                        app:layout_constraintBottom_toTopOf="@id/run_configuration"
+                        app:layout_constraintEnd_toEndOf="@id/setup_subtitle"
+                        app:layout_constraintStart_toStartOf="@id/setup_subtitle"
+                        app:layout_constraintTop_toBottomOf="@id/setup_third_separator" />
+
+                    <TextView
+                        android:id="@+id/run_configuration"
+                        style="@style/MainActionButtonAccented"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/broadcast_margin_normal"
+                        android:enabled="false"
+                        android:text="@string/run_auto_configuration"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="@id/setup_subtitle"
+                        app:layout_constraintStart_toStartOf="@id/setup_subtitle"
+                        app:layout_constraintTop_toBottomOf="@id/setup_note" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/testing_network"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/testing_network"
+                android:visibility="@{isTestActive ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toTopOf="@id/cancel_configuration"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/test_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="4dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/bg_progress_bar"
+                android:visibility="@{isTestActive ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/testing_network"
+                app:layout_constraintWidth_max="@dimen/main_item_width" />
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/skip_configuration"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/setup_container" />
+
+            <TextView
+                android:id="@+id/skip_configuration"
+                style="@style/MainActionButtonWeak"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/broadcast_margin_big"
+                android:text="@string/skip_this_step"
+                android:textSize="14sp"
+                android:visibility="@{isTestActive ? View.GONE : View.VISIBLE}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/space"
+                app:layout_constraintWidth_max="@dimen/main_item_width" />
+
+            <TextView
+                android:id="@+id/cancel_configuration"
+                style="@style/MainActionButtonWeak"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/broadcast_margin_small"
+                android:text="@string/cancel_configuration"
+                android:textSize="14sp"
+                android:visibility="@{isTestActive ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintWidth_max="@dimen/main_item_width"
+                tools:text="@string/skip_this_step" />
+
+            <FrameLayout
+                android:id="@+id/popup_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                android:layout_marginTop="@dimen/broadcast_notification_top_margin"
+                android:layout_marginEnd="@dimen/broadcast_margin_normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <include
+                layout="@layout/view_warning_notification"
+                android:visibility="@{popupUpdate.type == PopupType.WARNING ? View.VISIBLE : View.GONE}"
+                app:text="@{popupUpdate.text}"
+                app:title="@{popupUpdate.title}" />
+
+            <include
+                layout="@layout/view_error_notification"
+                android:visibility="@{popupUpdate.type == PopupType.ERROR ? View.VISIBLE : View.GONE}"
+                app:text="@{popupUpdate.text}"
+                app:title="@{popupUpdate.title}" />
+
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</layout>

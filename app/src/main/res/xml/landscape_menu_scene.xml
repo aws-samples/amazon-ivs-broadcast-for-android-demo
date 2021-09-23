@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        android:id="@+id/transition_closed_to_half_open"
+        motion:constraintSetEnd="@id/menu_half_open"
+        motion:constraintSetStart="@id/menu_closed"
+        motion:duration="@integer/transition_duration"
+        motion:onTouchUp="autoComplete">
+        <OnSwipe
+            motion:dragDirection="dragLeft"
+            motion:touchAnchorSide="left"
+            motion:touchRegionId="@id/landscape_menu_button_holder" />
+    </Transition>
+
+    <Transition
+        android:id="@+id/transition_half_open_to_full_open"
+        motion:constraintSetEnd="@id/menu_full_open"
+        motion:constraintSetStart="@id/menu_half_open"
+        motion:duration="@integer/transition_duration"
+        motion:onTouchUp="autoComplete">
+        <OnSwipe
+            motion:dragDirection="dragLeft"
+            motion:touchAnchorSide="left"
+            motion:touchRegionId="@id/landscape_menu_button_holder" />
+    </Transition>
+
+    <Transition
+        android:id="@+id/transition_full_open_to_half_open"
+        motion:constraintSetEnd="@id/menu_half_open"
+        motion:constraintSetStart="@id/menu_full_open"
+        motion:duration="@integer/transition_duration"
+        motion:onTouchUp="autoComplete">
+        <OnSwipe
+            motion:dragDirection="dragRight"
+            motion:touchAnchorSide="right"
+            motion:touchRegionId="@id/landscape_menu_button_holder" />
+    </Transition>
+
+    <Transition
+        android:id="@+id/transition_half_open_to_close"
+        motion:constraintSetEnd="@id/menu_closed"
+        motion:constraintSetStart="@id/menu_half_open"
+        motion:duration="@integer/transition_duration"
+        motion:onTouchUp="autoComplete">
+        <OnSwipe
+            motion:dragDirection="dragRight"
+            motion:touchAnchorSide="right"
+            motion:touchRegionId="@id/landscape_menu_button_holder" />
+    </Transition>
+
+    <ConstraintSet
+        android:id="@+id/menu_half_open"
+        motion:deriveConstraintsFrom="@id/base_landscape">
+        <Constraint
+            android:id="@+id/landscape_menu_button_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint
+            android:id="@+id/landscape_menu_metadata_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintStart_toEndOf="@+id/landscape_menu_button_holder"
+            motion:layout_constraintTop_toTopOf="parent" />
+    </ConstraintSet>
+
+    <ConstraintSet
+        android:id="@+id/menu_full_open"
+        motion:deriveConstraintsFrom="@id/base_landscape">
+        <Constraint
+            android:id="@+id/landscape_menu_button_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toStartOf="@id/landscape_menu_metadata_holder"
+            motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint
+            android:id="@+id/landscape_menu_metadata_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintTop_toTopOf="parent" />
+    </ConstraintSet>
+
+    <ConstraintSet
+        android:id="@+id/menu_closed"
+        motion:deriveConstraintsFrom="@id/base_landscape">
+        <Constraint
+            android:id="@+id/landscape_menu_button_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintStart_toEndOf="parent"
+            motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint
+            android:id="@+id/landscape_menu_metadata_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintStart_toEndOf="@+id/landscape_menu_button_holder"
+            motion:layout_constraintTop_toTopOf="parent" />
+    </ConstraintSet>
+
+    <ConstraintSet android:id="@+id/base_landscape">
+        <Constraint
+            android:id="@+id/landscape_menu_button_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintStart_toEndOf="parent"
+            motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint
+            android:id="@+id/landscape_menu_metadata_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintStart_toEndOf="@+id/landscape_menu_button_holder"
+            motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint
+            android:id="@+id/screen_capture_on"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/broadcast_primary_bg_color"
+            android:gravity="center"
+            android:orientation="vertical"
+            motion:visibilityMode="ignore" />
+        <Constraint
+            android:id="@+id/mini_preview_container_landscape"
+            android:layout_width="90dp"
+            android:layout_height="160dp"
+            android:layout_marginStart="@dimen/broadcast_margin_big"
+            motion:cardBackgroundColor="@color/broadcast_secondary_bg_color"
+            motion:cardCornerRadius="8dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintStart_toEndOf="@id/landscape_settings_button"
+            motion:visibilityMode="ignore" />
+    </ConstraintSet>
+
+</MotionScene>

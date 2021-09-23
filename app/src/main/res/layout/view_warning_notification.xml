@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="title"
+            type="String" />
+
+        <variable
+            name="text"
+            type="String" />
+
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/warning_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:translationZ="100dp"
+        app:cardBackgroundColor="@color/broadcast_alert_color"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/broadcast_padding_normal"
+            android:paddingTop="@dimen/broadcast_margin_tiny"
+            android:paddingEnd="@dimen/broadcast_padding_normal"
+            android:paddingBottom="@dimen/broadcast_padding_small">
+
+            <ImageView
+                android:id="@+id/warning_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_information"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/warning_title"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/broadcast_margin_tiny"
+                android:text="@{title}"
+                android:textAllCaps="true"
+                android:textColor="@color/broadcast_secondary_grey_color"
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@id/warning_icon"
+                app:layout_constraintTop_toTopOf="@id/warning_icon" />
+
+            <TextView
+                android:id="@+id/warning_text"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/broadcast_margin_small"
+                android:text="@{text}"
+                android:textColor="@color/broadcast_black_text_color"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@id/warning_icon"
+                app:layout_constraintTop_toBottomOf="@id/warning_icon" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</layout>

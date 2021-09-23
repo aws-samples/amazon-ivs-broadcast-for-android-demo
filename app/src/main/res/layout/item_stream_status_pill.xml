@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="pillText"
+            type="String" />
+
+        <variable
+            name="textColor"
+            type="Integer" />
+
+        <variable
+            name="backgroundResource"
+            type="Integer" />
+
+    </data>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/broadcast_padding_normal"
+            android:paddingEnd="@dimen/broadcast_padding_normal"
+            android:orientation="horizontal"
+            app:backgroundResource="@{backgroundResource}"
+            tools:background="@drawable/bg_online_pill">
+
+            <TextView
+                style="@style/TextStylePrimary"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/jetbrains_mono"
+                android:gravity="center"
+                android:textSize="14sp"
+                android:layout_gravity="center"
+                android:text="@{pillText}"
+                android:textColor="@{textColor}"
+                tools:text="0:01" />
+
+        </LinearLayout>
+
+</layout>

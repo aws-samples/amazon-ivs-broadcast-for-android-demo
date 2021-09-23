@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/broadcast_padding_normal">
+
+        <TextView
+            android:id="@+id/summary_title"
+            style="@style/TextStylePrimary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/configuration_summary"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@id/summary_container"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/summary_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/broadcast_margin_normal"
+            app:cardBackgroundColor="@color/broadcast_secondary_grey_color"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="5dp"
+            app:layout_constraintBottom_toTopOf="@id/continue_to_app"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/summary_title"
+            app:layout_constraintWidth_max="@dimen/main_item_width">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/summary_subtitle"
+                    style="@style/TextStyleSecondary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/broadcast_margin_normal"
+                    android:layout_marginTop="@dimen/broadcast_margin_normal"
+                    android:layout_marginEnd="@dimen/broadcast_margin_normal"
+                    android:text="@string/configuration_summary_subtitle"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <FrameLayout
+                    android:id="@+id/summary_first_separator"
+                    android:layout_width="0dp"
+                    android:layout_height="0.5dp"
+                    android:layout_marginTop="@dimen/broadcast_margin_normal"
+                    android:background="@color/broadcast_primary_grey_color"
+                    app:layout_constraintBottom_toTopOf="@id/summary_video_container"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/summary_subtitle" />
+
+                <LinearLayout
+                    android:id="@+id/summary_video_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/broadcast_padding_normal"
+                    android:paddingTop="@dimen/broadcast_padding_small"
+                    android:paddingEnd="@dimen/broadcast_padding_normal"
+                    android:paddingBottom="@dimen/broadcast_padding_small"
+                    app:layout_constraintBottom_toTopOf="@id/summary_second_separator"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/summary_first_separator">
+
+                    <TextView
+                        style="@style/TextStyleSecondary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/video_quality" />
+
+                    <TextView
+                        android:id="@+id/summary_quality_value"
+                        style="@style/TextStyleTertiary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="2720p60" />
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/summary_second_separator"
+                    android:layout_width="0dp"
+                    android:layout_height="0.5dp"
+                    android:background="@color/broadcast_primary_grey_color"
+                    app:layout_constraintBottom_toTopOf="@id/summary_bitrate_container"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/summary_video_container" />
+
+                <LinearLayout
+                    android:id="@+id/summary_bitrate_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/broadcast_padding_normal"
+                    android:paddingTop="@dimen/broadcast_padding_small"
+                    android:paddingEnd="@dimen/broadcast_padding_normal"
+                    android:paddingBottom="@dimen/broadcast_padding_small"
+                    app:layout_constraintBottom_toTopOf="@id/summary_third_separator"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/summary_second_separator">
+
+                    <TextView
+                        style="@style/TextStyleSecondary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/bitrate" />
+
+                    <TextView
+                        android:id="@+id/summary_bitrate_value"
+                        style="@style/TextStyleTertiary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="2500 kbps" />
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/summary_third_separator"
+                    android:layout_width="0dp"
+                    android:layout_height="0.5dp"
+                    android:background="@color/broadcast_primary_grey_color"
+                    app:layout_constraintBottom_toTopOf="@id/summary_data_usage_container"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/summary_bitrate_container" />
+
+                <LinearLayout
+                    android:id="@+id/summary_data_usage_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/broadcast_padding_normal"
+                    android:paddingTop="@dimen/broadcast_padding_small"
+                    android:paddingEnd="@dimen/broadcast_padding_normal"
+                    android:paddingBottom="@dimen/broadcast_padding_small"
+                    app:layout_constraintBottom_toTopOf="@id/summary_third_separator"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/summary_third_separator">
+
+                    <TextView
+                        style="@style/TextStyleSecondary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/estimated_data_usage" />
+
+                    <TextView
+                        android:id="@+id/summary_data_usage_value"
+                        style="@style/TextStyleTertiary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="2GB/hr" />
+
+                    <TextView
+                        style="@style/TextStyleTertiary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/broadcast_margin_normal"
+                        android:layout_marginBottom="@dimen/broadcast_margin_normal"
+                        android:text="@string/data_usage_note" />
+
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <Space
+            android:id="@+id/space"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/continue_to_app"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/summary_container" />
+
+        <TextView
+            android:id="@+id/continue_to_app"
+            style="@style/MainActionButtonAccented"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/broadcast_margin_big"
+            android:text="@string/continue_to_app"
+            app:layout_constraintBottom_toTopOf="@+id/rerun_configuration"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/space"
+            app:layout_constraintWidth_max="@dimen/main_item_width" />
+
+        <TextView
+            android:id="@+id/rerun_configuration"
+            style="@style/MainActionButtonWeak"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/broadcast_margin_small"
+            android:text="@string/rerun_auto_configuration"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/continue_to_app"
+            app:layout_constraintWidth_max="@dimen/main_item_width" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

@@ -1,0 +1,29 @@
+<resources>
+    <dimen name="broadcast_button_height">40dp</dimen>
+    <dimen name="main_item_width">372dp</dimen>
+    <dimen name="settings_start_padding">72dp</dimen>
+    <dimen name="settings_start_margin">72dp</dimen>
+    <dimen name="broadcast_controls_button_diameter">48dp</dimen>
+
+    <dimen name="broadcast_margin_tiny">4dp</dimen>
+    <dimen name="broadcast_margin_small">8dp</dimen>
+    <dimen name="broadcast_margin_medium">12dp</dimen>
+    <dimen name="broadcast_margin_normal">16dp</dimen>
+    <dimen name="broadcast_margin_big">24dp</dimen>
+    <dimen name="broadcast_margin_huge">48dp</dimen>
+    <dimen name="broadcast_notification_top_margin">64dp</dimen>
+
+    <dimen name="broadcast_padding_tiny">4dp</dimen>
+    <dimen name="broadcast_padding_small">8dp</dimen>
+    <dimen name="broadcast_padding_medium">12dp</dimen>
+    <dimen name="broadcast_padding_normal">16dp</dimen>
+    <dimen name="broadcast_padding_big">24dp</dimen>
+    <dimen name="broadcast_padding_huge">48dp</dimen>
+
+    <dimen name="bottom_sheet_developer_peek_height">204dp</dimen>
+    <dimen name="bottom_sheet_peek_height">164dp</dimen>
+<!--    <dimen name="bottom_sheet_developer_peek_height">220dp</dimen>-->
+<!--    <dimen name="bottom_sheet_peek_height">156dp</dimen>-->
+    <dimen name="broadcast_mini_player_bottom_margin">132dp</dimen>
+    <dimen name="broadcast_analytics_bottom_margin">132dp</dimen>
+</resources>

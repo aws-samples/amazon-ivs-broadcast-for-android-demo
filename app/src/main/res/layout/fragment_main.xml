@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="com.amazonaws.ivs.broadcast.BroadcastSession.State" />
+
+        <import type="com.amazon.ivs.broadcast.models.ui.PopupType" />
+
+        <variable
+            name="topBarUpdate"
+            type="com.amazon.ivs.broadcast.models.ui.StreamTopBarModel" />
+
+        <variable
+            name="isStreamMuted"
+            type="Boolean" />
+
+        <variable
+            name="isScreenCaptureOn"
+            type="Boolean" />
+
+        <variable
+            name="isCameraOff"
+            type="Boolean" />
+
+        <variable
+            name="showBlurredCameraMask"
+            type="Boolean" />
+
+        <variable
+            name="isViewLandscape"
+            type="Boolean" />
+
+        <variable
+            name="useCustomResolution"
+            type="Boolean" />
+
+        <variable
+            name="videoConfiguration"
+            type="com.amazonaws.ivs.broadcast.BroadcastConfiguration.Video" />
+
+        <variable
+            name="deviceHealthUpdate"
+            type="com.amazon.ivs.broadcast.models.ui.DeviceHealth" />
+
+        <variable
+            name="popupUpdate"
+            type="com.amazon.ivs.broadcast.models.ui.PopupModel" />
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".ui.fragments.main.MainFragment">
+
+            <LinearLayout
+                android:id="@+id/stream_quality_container"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="@{!topBarUpdate.streamOnline &amp;&amp; !isViewLandscape ?  View.VISIBLE : View.INVISIBLE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/stream_quality"
+                    style="@style/TextStyleSecondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/jetbrains_mono"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/broadcast_margin_medium"
+                    android:paddingEnd="@dimen/broadcast_margin_medium"
+                    android:textSize="14sp"
+                    tools:text="720p30" />
+
+                <TextView
+                    android:id="@+id/stream_framerate"
+                    style="@style/TextStyleSecondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:fontFamily="@font/jetbrains_mono"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/broadcast_margin_medium"
+                    android:paddingEnd="@dimen/broadcast_margin_medium"
+                    android:textSize="12sp"
+                    android:visibility="@{useCustomResolution ? View.VISIBLE : View.GONE}"
+                    tools:text="720p30"
+                    tools:visibility="gone" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/stream_used_network"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:fontFamily="@font/jetbrains_mono"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/broadcast_margin_medium"
+                android:paddingEnd="@dimen/broadcast_margin_medium"
+                android:text="@{topBarUpdate.formattedNetwork}"
+                android:textSize="14sp"
+                android:visibility="@{topBarUpdate.streamOnline &amp;&amp; !isViewLandscape ? View.VISIBLE : View.GONE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <FrameLayout
+                android:id="@+id/stream_status_pill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="@{isViewLandscape ? View.GONE : View.VISIBLE}"
+                app:layout_constraintBottom_toBottomOf="@id/stream_quality_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/stream_quality_container">
+
+                <include
+                    layout="@layout/item_stream_status_pill"
+                    android:visibility="@{topBarUpdate.streamStatus == State.CONNECTED ? View.VISIBLE : View.GONE}"
+                    app:backgroundResource="@{topBarUpdate.pillBackground}"
+                    app:pillText="@{topBarUpdate.formattedTime}"
+                    app:textColor="@{@color/broadcast_white_color}" />
+
+                <include
+                    layout="@layout/item_stream_status_pill"
+                    android:visibility="@{topBarUpdate.streamStatus == State.CONNECTING ? View.VISIBLE : View.GONE}"
+                    app:backgroundResource="@{topBarUpdate.pillBackground}"
+                    app:pillText="@{@string/connecting}"
+                    app:textColor="@{@color/broadcast_black_text_color}" />
+
+                <include
+                    layout="@layout/item_stream_status_pill"
+                    android:visibility="@{topBarUpdate.streamStatus == State.DISCONNECTED ? View.VISIBLE : View.GONE}"
+                    app:backgroundResource="@{topBarUpdate.pillBackground}"
+                    app:pillText="@{@string/offline}"
+                    app:textColor="@{@color/broadcast_tertiary_text_color}" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/stream_settings"
+                style="@style/TextStyleSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:fontFamily="@font/jetbrains_mono"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/broadcast_margin_medium"
+                android:paddingEnd="@dimen/broadcast_margin_medium"
+                android:text="@string/settings"
+                android:textColor="@color/broadcast_primary_accent_color"
+                android:textSize="14sp"
+                android:visibility="@{isViewLandscape ?  View.GONE : View.VISIBLE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/stream_quality_container" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/stream_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/stream_quality_container">
+
+                <LinearLayout
+                    android:id="@+id/default_slot_container"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:visibility="@{isCameraOff ? View.INVISIBLE : View.VISIBLE}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/camera_off_slot_container"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="@{isCameraOff &amp;&amp; !isScreenCaptureOn &amp;&amp; !isViewLandscape ? View.VISIBLE : View.INVISIBLE}"
+                    app:layout_constraintBottom_toBottomOf="@id/default_slot_container"
+                    app:layout_constraintEnd_toEndOf="@id/default_slot_container"
+                    app:layout_constraintStart_toStartOf="@id/default_slot_container"
+                    app:layout_constraintTop_toTopOf="@id/default_slot_container"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/camera_off_icon"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:contentDescription="@string/description_camera_toggle"
+                        android:src="@drawable/ic_camera_off"
+                        app:layout_constraintBottom_toTopOf="@id/camera_off_text"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="packed" />
+
+                    <TextView
+                        android:id="@+id/camera_off_text"
+                        style="@style/TextStylePrimary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/camera_off_mask_text"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/camera_off_icon" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:id="@+id/screen_capture_on"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/broadcast_primary_bg_color"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/broadcast_padding_big"
+                android:paddingEnd="@dimen/broadcast_padding_big"
+                android:visibility="@{isScreenCaptureOn &amp;&amp; !isViewLandscape? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/stream_quality_container">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_screen_sharing" />
+
+                <TextView
+                    style="@style/TextStylePrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/broadcast_margin_big"
+                    android:layout_marginBottom="@dimen/broadcast_margin_small"
+                    android:text="@string/screen_sharing_active"
+                    android:textSize="18sp" />
+
+                <TextView
+                    style="@style/TextStyleTertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/screensharing_camera_note"
+                    android:textAlignment="center"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/stop_screen_share_center_button"
+                    style="@style/TextStyleSecondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/broadcast_margin_normal"
+                    android:background="@drawable/bg_broadcast_rectangle_button"
+                    android:elevation="5dp"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/broadcast_padding_normal"
+                    android:paddingTop="@dimen/broadcast_padding_small"
+                    android:paddingEnd="@dimen/broadcast_padding_normal"
+                    android:paddingBottom="@dimen/broadcast_padding_small"
+                    android:text="@string/stop_sharing" />
+
+            </LinearLayout>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/mini_preview_container"
+                android:layout_width="90dp"
+                android:layout_height="160dp"
+                android:layout_marginTop="@dimen/broadcast_margin_medium"
+                android:layout_marginEnd="@dimen/broadcast_margin_big"
+                android:layout_marginBottom="@dimen/broadcast_mini_player_bottom_margin"
+                android:visibility="@{isScreenCaptureOn ? View.VISIBLE : View.GONE}"
+                app:cardBackgroundColor="@color/broadcast_secondary_bg_color"
+                app:cardCornerRadius="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <FrameLayout
+                        android:id="@+id/mini_preview"
+                        android:visibility="@{!isCameraOff ? View.VISIBLE : View.INVISIBLE}"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <LinearLayout
+                        android:id="@+id/mini_camera_off_slot_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:visibility="@{isCameraOff ? View.VISIBLE : View.INVISIBLE}"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        tools:visibility="visible"
+                        tools:ignore="UseCompoundDrawables">
+
+                        <ImageView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:contentDescription="@string/description_camera_toggle"
+                            android:src="@drawable/ic_camera_off" />
+
+                        <TextView
+                            style="@style/TextStylePrimary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/camera_off_mask_text"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <FrameLayout
+                android:id="@+id/popup_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                android:layout_marginTop="@dimen/broadcast_notification_top_margin"
+                android:layout_marginEnd="@dimen/broadcast_margin_normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_max="@dimen/main_item_width">
+
+                <include
+                    layout="@layout/view_warning_notification"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="@{popupUpdate.type == PopupType.WARNING ? View.VISIBLE : View.GONE}"
+                    app:text="@{popupUpdate.text}"
+                    app:title="@{popupUpdate.title}"
+                    tools:visibility="visible" />
+
+                <include
+                    layout="@layout/view_success_notification"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="@{popupUpdate.type == PopupType.SUCCESS ? View.VISIBLE : View.GONE}"
+                    app:text="@{popupUpdate.text}"
+                    app:title="@{popupUpdate.title}"
+                    tools:visibility="gone" />
+
+                <include
+                    layout="@layout/view_error_notification"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="@{popupUpdate.type == PopupType.ERROR ? View.VISIBLE : View.GONE}"
+                    app:text="@{popupUpdate.text}"
+                    app:title="@{popupUpdate.title}"
+                    tools:visibility="gone" />
+
+            </FrameLayout>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/debug_info"
+                android:layout_width="@dimen/main_item_width"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/broadcast_margin_medium"
+                android:layout_marginTop="@dimen/broadcast_margin_normal"
+                android:layout_marginEnd="@dimen/broadcast_margin_medium"
+                android:layout_marginBottom="@dimen/broadcast_analytics_bottom_margin"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/broadcast_grey_strong_transparent_color"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/stream_quality_container">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/broadcast_padding_normal"
+                    android:paddingTop="@dimen/broadcast_padding_small"
+                    android:paddingEnd="@dimen/broadcast_padding_medium"
+                    android:paddingBottom="@dimen/broadcast_padding_medium">
+
+                    <ScrollView
+                        android:id="@+id/analytics_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:fillViewport="true"
+                        app:layout_constraintBottom_toTopOf="@id/copy_button"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/cpu"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/cpu"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/cpu_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="@dimen/broadcast_margin_tiny"
+                                android:text="@{deviceHealthUpdate.cpuUsage}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/cpu"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="@id/cpu"
+                                tools:text="9%" />
+
+                            <TextView
+                                android:id="@+id/memory"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/mem"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/cpu" />
+
+                            <TextView
+                                android:id="@+id/memory_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{deviceHealthUpdate.usedMemory}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/memory"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/memory"
+                                tools:text="300MB" />
+
+                            <TextView
+                                android:id="@+id/temperature"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/temp"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/memory" />
+
+                            <TextView
+                                android:id="@+id/temperature_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{deviceHealthUpdate.cpuTemp}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/temperature"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/temperature"
+                                tools:text="24C" />
+
+                            <TextView
+                                android:id="@+id/video_config"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/video_config"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toTopOf="@id/initial_bitrate"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/temperature" />
+
+                            <TextView
+                                android:id="@+id/initial_bitrate"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/initial_bitrate"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toTopOf="@id/max_bitrate"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/video_config" />
+
+                            <TextView
+                                android:id="@+id/initial_bitrate_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{String.valueOf(videoConfiguration.initialBitrate)}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/initial_bitrate"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/initial_bitrate"
+                                tools:text="150000" />
+
+                            <TextView
+                                android:id="@+id/max_bitrate"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/maxbitrate"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toTopOf="@id/min_bitrate"
+                                app:layout_constraintStart_toStartOf="@id/initial_bitrate"
+                                app:layout_constraintTop_toBottomOf="@id/initial_bitrate" />
+
+                            <TextView
+                                android:id="@+id/max_bitrate_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{String.valueOf(videoConfiguration.maxBitrate)}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/max_bitrate"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/max_bitrate"
+                                tools:text="850000" />
+
+                            <TextView
+                                android:id="@+id/min_bitrate"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/minbitrate"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toTopOf="@id/target_frame_rate"
+                                app:layout_constraintStart_toStartOf="@id/initial_bitrate"
+                                app:layout_constraintTop_toBottomOf="@id/max_bitrate" />
+
+                            <TextView
+                                android:id="@+id/minimum_bitrate_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{String.valueOf(videoConfiguration.minBitrate)}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/min_bitrate"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/min_bitrate"
+                                tools:text="100000" />
+
+                            <TextView
+                                android:id="@+id/target_frame_rate"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/targetframerate"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/min_bitrate" />
+
+                            <TextView
+                                android:id="@+id/target_framerate_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{String.valueOf(videoConfiguration.targetFramerate)}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/target_frame_rate"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/target_frame_rate"
+                                tools:text="60" />
+
+                            <TextView
+                                android:id="@+id/keyframe_interval"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/keyframeinterval"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/target_frame_rate" />
+
+                            <TextView
+                                android:id="@+id/keyframe_interval_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{String.valueOf(videoConfiguration.keyframeInterval)}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/keyframe_interval"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/keyframe_interval"
+                                tools:text="1" />
+
+                            <TextView
+                                android:id="@+id/use_auto_bitrate"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/useautobitrate"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/keyframe_interval" />
+
+                            <TextView
+                                android:id="@+id/use_auto_bitrate_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{String.valueOf(videoConfiguration.useAutoBitrate)}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/use_auto_bitrate"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/use_auto_bitrate"
+                                tools:text="true" />
+
+                            <TextView
+                                android:id="@+id/use_bframes"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/use_bframes"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/use_auto_bitrate" />
+
+                            <TextView
+                                android:id="@+id/use_bframes_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{String.valueOf(videoConfiguration.useBFrames)}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/use_bframes"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/use_bframes"
+                                tools:text="true" />
+
+                            <TextView
+                                android:id="@+id/codec"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/codec"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/use_bframes" />
+
+                            <TextView
+                                android:id="@+id/codec_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avc"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/codec"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/codec"
+                                tools:text="AVC" />
+
+                            <TextView
+                                android:id="@+id/size"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/broadcast_margin_normal"
+                                android:layout_marginTop="@dimen/broadcast_margin_tiny"
+                                android:text="@string/size"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="@id/cpu"
+                                app:layout_constraintTop_toBottomOf="@id/codec" />
+
+                            <TextView
+                                android:id="@+id/size_value"
+                                style="@style/TextStyleSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{String.format(@string/size_template, Math.round(videoConfiguration.size.x), Math.round(videoConfiguration.size.y))}"
+                                android:textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="@id/size"
+                                app:layout_constraintEnd_toEndOf="@id/cpu_value"
+                                app:layout_constraintTop_toTopOf="@id/size"
+                                tools:text="720x720" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </ScrollView>
+
+                    <TextView
+                        android:id="@+id/copy_button"
+                        style="@style/MainActionButtonAccented"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/broadcast_margin_medium"
+                        android:layout_marginEnd="@dimen/broadcast_margin_tiny"
+                        android:fontFamily="@font/amazon_ember"
+                        android:text="@string/copy"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/hide_debug_info"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/analytics_container" />
+
+                    <TextView
+                        android:id="@+id/hide_debug_info"
+                        style="@style/MainActionButtonAccented"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/broadcast_margin_tiny"
+                        android:fontFamily="@font/amazon_ember"
+                        android:text="@string/hide_debug_info"
+                        app:layout_constraintBottom_toBottomOf="@id/copy_button"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/copy_button"
+                        app:layout_constraintTop_toTopOf="@id/copy_button" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <FrameLayout
+            android:id="@+id/pip_preview_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <include
+            android:id="@+id/broadcast_bottom_sheet"
+            layout="@layout/view_bottom_menu"
+            app:isCameraOff="@{isCameraOff}"
+            app:isScreenCaptureOn="@{isScreenCaptureOn}"
+            app:isStreamMuted="@{isStreamMuted}"
+            app:isStreamOnline="@{topBarUpdate.streamOnline}"
+            tools:visibility="visible" />
+
+        <include
+            android:id="@+id/broadcast_side_sheet"
+            layout="@layout/view_side_menu"
+            app:isCameraOff="@{isCameraOff}"
+            app:isScreenCaptureOn="@{isScreenCaptureOn}"
+            app:isStreamMuted="@{isStreamMuted}"
+            app:topBarUpdate="@{topBarUpdate}"
+            app:isStreamOnline="@{topBarUpdate.streamOnline}"
+            app:layout_anchor="@+id/constraintLayout"
+            app:layout_anchorGravity="center"
+            app:useCustomResolution="@{useCustomResolution}"
+            tools:visibility="visible" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>

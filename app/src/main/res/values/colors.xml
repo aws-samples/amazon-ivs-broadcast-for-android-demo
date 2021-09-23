@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="broadcast_primary_bg_color">#0D0D0D</color>
+    <color name="broadcast_secondary_bg_color">#121212</color>
+    <color name="broadcast_primary_accent_color">#F8D74A</color>
+    <color name="broadcast_primary_accent_dark_color">#A58D42</color>
+    <color name="broadcast_primary_grey_color">#636363</color>
+    <color name="broadcast_secondary_grey_color">#2B2B2B</color>
+    <color name="broadcast_grey_semi_transparent_color">#FF1F1F1F</color>
+    <color name="broadcast_transparent">#00000000</color>
+    <color name="broadcast_grey_strong_transparent_color">#CC1F1F1F</color>
+    <color name="broadcast_white_color">#FFF</color>
+    <color name="broadcast_alert_dialog_background_color">#121212</color>
+    <color name="broadcast_settings_primary_color">#161616</color>
+    <color name="broadcast_divider_color">#2C2C2C</color>
+    <color name="broadcast_stream_controls_button_color">#464646</color>
+    <color name="broadcast_primary_red_color">#EA4F3D</color>
+    <color name="broadcast_json_code_color">#777</color>
+    <color name="broadcast_connecting_pill_color">#979797</color>
+    <color name="broadcast_disabled_button_border_color">#404040</color>
+    <color name="broadcast_progress_bar_background_color">#2FEAEAF6</color>
+    <color name="broadcast_bottom_sheet_drag_handle_color">#524F50</color>
+    <color name="broadcast_landscape_settings_icon_color">#FFD056</color>
+
+    <!-- Switch -->
+    <color name="broadcast_switch_track">#706c6c</color>
+    <color name="broadcast_switch_thumb">#a8a4a4</color>
+
+    <!-- Alerts, warnings... -->
+    <color name="broadcast_alert_color">#FFD056</color>
+    <color name="broadcast_success_color">#348D43</color>
+    <color name="broadcast_error_color">#CC422F</color>
+
+    <!-- Text colors -->
+    <color name="broadcast_disabled_button_text_color">#8D8D8D</color>
+    <color name="broadcast_yellow_text_color">#E3CD00</color>
+    <color name="broadcast_black_text_color">#000</color>
+    <color name="broadcast_tertiary_text_color">#B0B0B0</color>
+    <color name="broadcast_summary_footer_text_color">#969696</color>
+    <color name="broadcast_success_notification_title_color">#99FFFFFF</color>
+</resources>
