@@ -24,7 +24,7 @@ This repository contains a demo app, which shows how to use the Amazon IVS mobil
 ### Referencing your stream in the app
 
 1. Open the [Amazon IVS Console](https://console.aws.amazon.com/ivs) and navigate to the channel you would like to use.
-2. Open the App's `build.grade` file and find lines 18-20.
+2. Open the App's `build.gradle` file and find lines 18-20.
 3. Copy the _Ingest Server_ for the channel and paste it into the `SERVER_URL` field on line 18 between the two escaped quotes. The resulting line should look like the following: `buildConfigField "String", "SERVER_URL", "\"rtmps://<ingest_server_url>:443/app/\""`
 4. Copy the _Stream Key_ for the channel and paste it into the `STREAM_KEY` field on line 19 between the two escaped quotes.
 5. Copy the _Playback URL_ for the channel and paste it into the `PLAYBACK_URL` field on line 20 between the two escaped quotes.
