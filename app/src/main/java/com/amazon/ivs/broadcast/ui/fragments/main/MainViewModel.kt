@@ -317,6 +317,7 @@ class MainViewModel(
     fun stopScreenShare() {
         Timber.d("Stopping screen capture")
         isScreenShareEnabled.postConsumable(false)
+        session?.stopSystemCapture()
         slotNames.forEach { slot ->
             session?.mixer?.removeSlot(slot)
         }
