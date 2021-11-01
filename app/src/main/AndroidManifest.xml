@@ -24,10 +24,8 @@
         <activity android:name=".ui.activities.MainActivity"
             android:supportsPictureInPicture="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:screenOrientation="portrait"
             tools:targetApi="n"
-            android:exported="true"
-            tools:ignore="LockedOrientationActivity">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
