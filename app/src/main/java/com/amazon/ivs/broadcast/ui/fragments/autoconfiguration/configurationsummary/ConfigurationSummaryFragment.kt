@@ -17,7 +17,7 @@ import com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.AutoConfiguration
 class ConfigurationSummaryFragment : BaseFragment() {
 
     private lateinit var binding: FragmentConfigurationSummaryBinding
-    private val viewModel by lazyViewModel(
+    private val autoConfigurationViewModel by lazyViewModel(
         { requireActivity().application as App },
         { AutoConfigurationViewModel() }
     )
@@ -31,7 +31,7 @@ class ConfigurationSummaryFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.onRecommendationReceived.consumedValue?.run {
+        autoConfigurationViewModel.onRecommendationReceived.consumedValue?.run {
             configurationViewModel.recommendation = this
 
             binding.summaryBitrateValue.text = toFormattedKbps(targetBitrate)
@@ -44,12 +44,12 @@ class ConfigurationSummaryFragment : BaseFragment() {
         }
 
         binding.continueToApp.setOnClickListener {
-            viewModel.release()
-            if (viewModel.isRunnedFromSettingsView) openFragment(R.id.navigation_settings) else openFragment(R.id.navigation_main)
+            autoConfigurationViewModel.release()
+            if (autoConfigurationViewModel.isRunnedFromSettingsView) openFragment(R.id.navigation_settings) else openFragment(R.id.navigation_main)
         }
 
         binding.rerunConfiguration.setOnClickListener {
-            viewModel.rerunConfiguration = true
+            autoConfigurationViewModel.rerunConfiguration = true
             openFragment(R.id.navigation_configuration_setup)
         }
     }

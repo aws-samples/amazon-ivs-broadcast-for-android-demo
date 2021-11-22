@@ -152,4 +152,6 @@
     <string name="playback_url">Playback URL</string>
     <string name="playback_url_hint">https://</string>
     <string name="playback_url_template">https://www.ivs.rocks/live#%1$s</string>
+    <string name="error_fatal">Broadcast failed</string>
+    <string name="error_device_disconnected">Device disconnected</string>
 </resources>

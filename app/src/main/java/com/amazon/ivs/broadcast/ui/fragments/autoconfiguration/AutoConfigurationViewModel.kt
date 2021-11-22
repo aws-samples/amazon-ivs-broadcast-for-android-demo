@@ -6,7 +6,7 @@ import android.os.Looper
 import androidx.lifecycle.ViewModel
 import com.amazon.ivs.broadcast.common.ConsumableLiveData
 import com.amazon.ivs.broadcast.common.TIME_UNTIL_WARNING
-import com.amazon.ivs.broadcast.common.launchMain
+import com.amazon.ivs.broadcast.common.launch
 import com.amazon.ivs.broadcast.models.Recommendation
 import com.amazonaws.ivs.broadcast.BroadcastConfiguration
 import com.amazonaws.ivs.broadcast.BroadcastSession
@@ -36,7 +36,7 @@ class AutoConfigurationViewModel : ViewModel() {
         endpointUrl: String?,
         streamKey: String?,
         context: Context,
-    ) = launchMain {
+    ) = launch {
         startTimer()
         BroadcastSession(context, null, BroadcastConfiguration(), emptyArray()).apply {
             testSession = this
@@ -44,7 +44,7 @@ class AutoConfigurationViewModel : ViewModel() {
                 endpointUrl,
                 streamKey
             ) { result ->
-                launchMain {
+                launch {
                     if (!shouldTestContinue) stopTest()
                     result.recommendations.firstOrNull()?.run {
                         val recommendation = Recommendation(
