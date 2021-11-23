@@ -178,6 +178,8 @@ class BroadcastManager(private val context: Application) {
         }
         cameraDevice = null
         microphoneDevice = null
+        cameraOffDevice = null
+        cameraOffBitmap = null
         session = null
     }
 
