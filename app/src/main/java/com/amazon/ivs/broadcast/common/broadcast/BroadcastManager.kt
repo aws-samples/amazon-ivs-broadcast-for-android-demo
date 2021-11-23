@@ -329,6 +329,8 @@ class BroadcastManager(private val context: Application) {
 
     private fun attachInitialDevices() {
         Timber.d("Attaching devices")
+        var cameraFound = false
+        var microphoneFound = false
         val availableCameras = mutableListOf<Device.Descriptor>()
         BroadcastSession.listAvailableDevices(context).forEach { descriptor ->
             if (descriptor.type == Device.Descriptor.DeviceType.CAMERA) {
@@ -336,14 +338,16 @@ class BroadcastManager(private val context: Application) {
                         && configuration.defaultCameraId == descriptor.deviceId)
                         || configuration.defaultCameraId == null
                 availableCameras.add(descriptor)
-                if (cameraDevice == null && isAcceptableDevice) {
+                if (isAcceptableDevice && !cameraFound) {
+                    cameraFound = true
                     attachDevice(descriptor) { device ->
                         cameraDevice = device
                         displayCameraOutput()
                     }
                 }
             }
-            if (microphoneDevice == null && descriptor.type == Device.Descriptor.DeviceType.MICROPHONE) {
+            if (descriptor.type == Device.Descriptor.DeviceType.MICROPHONE && !microphoneFound) {
+                microphoneFound = true
                 attachDevice(descriptor) { device ->
                     microphoneDevice = device.descriptor
                 }
