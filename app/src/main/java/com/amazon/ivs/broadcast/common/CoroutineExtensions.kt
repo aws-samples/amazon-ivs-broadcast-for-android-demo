@@ -10,7 +10,11 @@ import timber.log.Timber
 private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
 @Suppress("FunctionName")
-fun <T> ConsumableSharedFlow() = MutableSharedFlow<T>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+fun <T> ConsumableSharedFlow(canReplay: Boolean = false) = MutableSharedFlow<T>(
+    replay = if (canReplay) 1 else 0,
+    extraBufferCapacity = 1,
+    onBufferOverflow = BufferOverflow.DROP_OLDEST
+)
 
 fun <T> MutableSharedFlow<T>.emitNew(value: T) {
     if (replayCache.lastOrNull() != value) {

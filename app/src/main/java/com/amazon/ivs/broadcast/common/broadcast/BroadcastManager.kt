@@ -60,12 +60,12 @@ class BroadcastManager(private val context: Application) {
 
     private var _onError = ConsumableSharedFlow<BroadcastError>()
     private var _onEvent = ConsumableSharedFlow<BroadcastState>()
-    private var _onPreviewUpdated = ConsumableSharedFlow<TextureView?>()
-    private var _onAudioMuted = ConsumableSharedFlow<Boolean>()
-    private var _onVideoMuted = ConsumableSharedFlow<Boolean>()
-    private var _onScreenShareEnabled = ConsumableSharedFlow<Boolean>()
-    private var _onStreamDataChanged = ConsumableSharedFlow<StreamTopBarModel>()
-    private var _onDevicesListed = ConsumableSharedFlow<List<DeviceItem>>()
+    private var _onPreviewUpdated = ConsumableSharedFlow<TextureView?>(canReplay = true)
+    private var _onAudioMuted = ConsumableSharedFlow<Boolean>(canReplay = true)
+    private var _onVideoMuted = ConsumableSharedFlow<Boolean>(canReplay = true)
+    private var _onScreenShareEnabled = ConsumableSharedFlow<Boolean>(canReplay = true)
+    private var _onStreamDataChanged = ConsumableSharedFlow<StreamTopBarModel>(canReplay = true)
+    private var _onDevicesListed = ConsumableSharedFlow<List<DeviceItem>>(canReplay = true)
 
     private lateinit var configuration: ConfigurationViewModel
     private var session: BroadcastSession? = null
