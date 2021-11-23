@@ -16,11 +16,12 @@ val slotNames = listOf(
 const val INITIAL_BPS = 1500000
 const val INITIAL_WIDTH = 720f
 const val INITIAL_HEIGHT: Float = 1280f
-const val INITIAL_FRAMERATE: Int = 30
+const val INITIAL_FRAME_RATE: Int = 30
 
 const val ANIMATION_DURATION = 250L
 const val TIME_UNTIL_WARNING = 15000L
 const val POPUP_DURATION = 10000L
+const val DISABLE_DURATION = 1000L
 
 const val BYTES_TO_MEGABYTES_FACTOR = 10485760
 const val MB_TO_GB_FACTOR = 1024

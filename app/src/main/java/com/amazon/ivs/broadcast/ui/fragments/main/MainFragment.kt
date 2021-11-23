@@ -449,10 +449,14 @@ class MainFragment : BaseFragment() {
     }
 
     private fun onFlipCameraButtonClick() {
+        binding.broadcastBottomSheet.broadcastFlip.disableAndEnable()
+        binding.broadcastSideSheet.broadcastFlip.disableAndEnable()
         viewModel.switchCameraDirection()
     }
 
-    private fun onCameraButtonClick() = launchUI {
+    private fun onCameraButtonClick() {
+        binding.broadcastBottomSheet.broadcastCamera.disableAndEnable()
+        binding.broadcastSideSheet.broadcastCamera.disableAndEnable()
         if (viewModel.isScreenShareEnabled) {
             binding.miniCameraOffSlotContainer.doOnLayout {
                 viewModel.toggleCamera(binding.miniCameraOffSlotContainer.drawToBitmap())
@@ -464,12 +468,13 @@ class MainFragment : BaseFragment() {
         }
     }
 
-    private fun switchStreamContainer(textureView: TextureView) {
+    private fun switchStreamContainer(textureView: TextureView?) {
         binding.broadcastSideSheet.defaultSlotContainerLandscape.removeAllViews()
         binding.defaultSlotContainer.removeAllViews()
         binding.broadcastSideSheet.miniPreview.removeAllViews()
         binding.miniPreview.removeAllViews()
         binding.pipPreviewContainer.removeAllViews()
+        if (textureView == null) return
         Timber.d("Add preview to container")
         when {
             isInPipMode -> binding.pipPreviewContainer.addView(textureView)
@@ -527,8 +532,8 @@ class MainFragment : BaseFragment() {
     }
 
     private fun scaleToMatchResolution(view: View) {
-        val container =
-            if (requireContext().isViewLandscape()) binding.broadcastSideSheet.streamContainerLandscape else binding.streamContainer
+        val container = if (requireContext().isViewLandscape()) binding.broadcastSideSheet.streamContainerLandscape else
+            binding.streamContainer
         val screenWidth = container.width
         val screenHeight = container.height
         var width = 1 * configurationViewModel.resolution.widthAgainstHeightRatio
