@@ -57,9 +57,10 @@ class BroadcastManager(private val context: Application) {
     }
     private var startBytes = 0f
     private var timeInSeconds = 0
+    private var currentState = BroadcastState.BROADCAST_UPDATED
 
     private var _onError = ConsumableSharedFlow<BroadcastError>()
-    private var _onEvent = ConsumableSharedFlow<BroadcastState>()
+    private var _onBroadcastState = ConsumableSharedFlow<BroadcastState>()
     private var _onPreviewUpdated = ConsumableSharedFlow<TextureView?>(canReplay = true)
     private var _onAudioMuted = ConsumableSharedFlow<Boolean>(canReplay = true)
     private var _onVideoMuted = ConsumableSharedFlow<Boolean>(canReplay = true)
@@ -82,12 +83,17 @@ class BroadcastManager(private val context: Application) {
                 BroadcastSession.State.INVALID,
                 BroadcastSession.State.DISCONNECTED,
                 BroadcastSession.State.ERROR -> {
-                    _onEvent.emitNew(BroadcastState.BROADCAST_ENDED)
+                    currentState = BroadcastState.BROADCAST_ENDED
+                    _onBroadcastState.emitNew(currentState)
                     resetTimer()
                 }
-                BroadcastSession.State.CONNECTING -> _onEvent.emitNew(BroadcastState.BROADCAST_STARTING)
+                BroadcastSession.State.CONNECTING -> {
+                    currentState = BroadcastState.BROADCAST_STARTING
+                    _onBroadcastState.emitNew(currentState)
+                }
                 BroadcastSession.State.CONNECTED -> {
-                    _onEvent.emitNew(BroadcastState.BROADCAST_STARTED)
+                    currentState = BroadcastState.BROADCAST_STARTED
+                    _onBroadcastState.emitNew(currentState)
                     timerRunnable.run()
                 }
             }
@@ -146,10 +152,10 @@ class BroadcastManager(private val context: Application) {
         private set
     var isAudioMuted = false
         private set
-    val isStreamOnline get() = onBroadcastState.replayCache.lastOrNull() == BroadcastState.BROADCAST_STARTED
+    val isStreamOnline get() = currentState == BroadcastState.BROADCAST_STARTED
 
     val onError = _onError.asSharedFlow()
-    val onBroadcastState = _onEvent.asSharedFlow()
+    val onBroadcastState = _onBroadcastState.asSharedFlow()
     val onPreviewUpdated = _onPreviewUpdated.asSharedFlow()
     val onAudioMuted = _onAudioMuted.asSharedFlow()
     val onVideoMuted = _onVideoMuted.asSharedFlow()
@@ -267,7 +273,8 @@ class BroadcastManager(private val context: Application) {
             session?.listAttachedDevices()?.forEach {
                 Timber.d("Attached device: ${it.descriptor.deviceId}, ${it.descriptor.friendlyName}, ${it.descriptor.type}")
             }
-            _onEvent.emitNew(BroadcastState.BROADCAST_UPDATED)
+            currentState = BroadcastState.BROADCAST_UPDATED
+            _onBroadcastState.emitNew(currentState)
         }
     }
 

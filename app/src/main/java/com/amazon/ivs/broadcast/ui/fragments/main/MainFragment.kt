@@ -436,6 +436,7 @@ class MainFragment : BaseFragment() {
     }
 
     private fun onGoLiveButtonClick() {
+        Timber.d("Will start stream: ${!viewModel.isStreamOnline}")
         if (viewModel.isStreamOnline) {
             viewModel.resetSession()
             viewModel.createSession()
