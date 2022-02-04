@@ -35,7 +35,6 @@ enum class BroadcastState {
     BROADCAST_STARTING,
     BROADCAST_STARTED,
     BROADCAST_ENDED,
-    BROADCAST_UPDATED,
 }
 
 class BroadcastManager(private val context: Application) {
@@ -57,7 +56,7 @@ class BroadcastManager(private val context: Application) {
     }
     private var startBytes = 0f
     private var timeInSeconds = 0
-    private var currentState = BroadcastState.BROADCAST_UPDATED
+    private var currentState = BroadcastState.BROADCAST_ENDED
 
     private var _onError = ConsumableSharedFlow<BroadcastError>()
     private var _onBroadcastState = ConsumableSharedFlow<BroadcastState>()
@@ -273,8 +272,6 @@ class BroadcastManager(private val context: Application) {
             session?.listAttachedDevices()?.forEach {
                 Timber.d("Attached device: ${it.descriptor.deviceId}, ${it.descriptor.friendlyName}, ${it.descriptor.type}")
             }
-            currentState = BroadcastState.BROADCAST_UPDATED
-            _onBroadcastState.emitNew(currentState)
         }
     }
 

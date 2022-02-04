@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import com.amazon.ivs.broadcast.common.broadcast.*
 import com.amazon.ivs.broadcast.common.launch
 import com.amazon.ivs.broadcast.ui.fragments.ConfigurationViewModel
-import kotlinx.coroutines.flow.collect
 import timber.log.Timber
 
 class MainViewModel(
