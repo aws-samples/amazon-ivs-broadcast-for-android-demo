@@ -58,4 +58,6 @@ class MainViewModel(
     fun createSession() = broadcastManager.createSession()
 
     fun startStream() = broadcastManager.startStream()
+
+    fun reloadPreview() = broadcastManager.displayCameraOutput()
 }

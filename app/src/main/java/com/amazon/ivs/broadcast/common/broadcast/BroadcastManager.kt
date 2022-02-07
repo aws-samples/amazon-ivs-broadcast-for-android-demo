@@ -39,7 +39,7 @@ enum class BroadcastState {
 
 class BroadcastManager(private val context: Application) {
 
-    private val isBackCamera get() = cameraDevice?.descriptor?.position == Device.Descriptor.Position.BACK
+    private var isBackCamera = true
     private val cameraDirection get() = if (isBackCamera) Device.Descriptor.Position.BACK else Device.Descriptor.Position.FRONT
 
     private val timerHandler = Handler(Looper.getMainLooper())
@@ -60,11 +60,11 @@ class BroadcastManager(private val context: Application) {
 
     private var _onError = ConsumableSharedFlow<BroadcastError>()
     private var _onBroadcastState = ConsumableSharedFlow<BroadcastState>()
-    private var _onPreviewUpdated = ConsumableSharedFlow<TextureView?>(canReplay = true)
+    private var _onStreamDataChanged = ConsumableSharedFlow<StreamTopBarModel>()
+    private var _onPreviewUpdated = ConsumableSharedFlow<TextureView?>()
     private var _onAudioMuted = ConsumableSharedFlow<Boolean>(canReplay = true)
     private var _onVideoMuted = ConsumableSharedFlow<Boolean>(canReplay = true)
     private var _onScreenShareEnabled = ConsumableSharedFlow<Boolean>(canReplay = true)
-    private var _onStreamDataChanged = ConsumableSharedFlow<StreamTopBarModel>(canReplay = true)
     private var _onDevicesListed = ConsumableSharedFlow<List<DeviceItem>>(canReplay = true)
 
     private lateinit var configuration: ConfigurationViewModel
@@ -176,16 +176,27 @@ class BroadcastManager(private val context: Application) {
     }
 
     fun resetSession() {
+        var releasingSession = false
         session?.run {
+            releasingSession = true
             Timber.d("Releasing session")
+            cameraDevice?.run { detachDevice(this) }
+            microphoneDevice?.run { detachDevice(this) }
+            cameraOffDevice?.run { detachDevice(this) }
+            stopSystemCapture()
             stop()
             release()
         }
+        _onBroadcastState.tryEmit(BroadcastState.BROADCAST_ENDED)
+        _onPreviewUpdated.tryEmit(null)
         cameraDevice = null
         microphoneDevice = null
         cameraOffDevice = null
         cameraOffBitmap = null
         session = null
+        if (releasingSession) {
+            Timber.d("Session released")
+        }
     }
 
     fun startStream() {
@@ -204,6 +215,7 @@ class BroadcastManager(private val context: Application) {
             _onPreviewUpdated.tryEmit(null)
             session?.exchangeDevices(cameraDevice!!, newCamera) { device ->
                 Timber.d("Cameras exchanged from: ${cameraDevice?.descriptor?.friendlyName} to: ${device.descriptor.friendlyName}")
+                isBackCamera = !isBackCamera
                 cameraDevice = device
                 displayCameraOutput()
             }
@@ -318,6 +330,19 @@ class BroadcastManager(private val context: Application) {
         }
     }
 
+    fun displayCameraOutput() {
+        (cameraDevice as? ImageDevice)?.getPreviewView(BroadcastConfiguration.AspectMode.FILL)?.run {
+            launchMain {
+                Timber.d("Camera output ready")
+                layoutParams = ViewGroup.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                )
+                _onPreviewUpdated.tryEmit(this@run)
+            }
+        }
+    }
+
     private fun createNotification(): Notification? {
         Timber.d("Creating notification")
         var notification: Notification? = null
@@ -341,9 +366,12 @@ class BroadcastManager(private val context: Application) {
                 val isAcceptableDevice = (configuration.defaultCameraId != null
                         && configuration.defaultCameraId == descriptor.deviceId)
                         || configuration.defaultCameraId == null
+                val hasCorrectFacing = isBackCamera && descriptor.position == Device.Descriptor.Position.BACK ||
+                        !isBackCamera && descriptor.position == Device.Descriptor.Position.FRONT
                 availableCameras.add(descriptor)
-                if (isAcceptableDevice && !cameraFound) {
+                if (isAcceptableDevice && !cameraFound && hasCorrectFacing) {
                     cameraFound = true
+                    Timber.d("Attaching camera: ${descriptor.friendlyName}")
                     attachDevice(descriptor) { device ->
                         cameraDevice = device
                         displayCameraOutput()
@@ -352,6 +380,7 @@ class BroadcastManager(private val context: Application) {
             }
             if (descriptor.type == Device.Descriptor.DeviceType.MICROPHONE && !microphoneFound) {
                 microphoneFound = true
+                Timber.d("Attaching mic: ${descriptor.friendlyName}")
                 attachDevice(descriptor) { device ->
                     microphoneDevice = device.descriptor
                 }
@@ -359,7 +388,7 @@ class BroadcastManager(private val context: Application) {
         }
         cameraOffDevice = session?.createImageInputSource()
         _onDevicesListed.tryEmit(availableCameras.map { DeviceItem(it.type.name, it.deviceId, it.position.name) })
-        Timber.d("Initial devices attached: ${cameraDevice?.descriptor?.friendlyName}, ${microphoneDevice?.friendlyName}")
+        Timber.d("Initial devices attached: ${availableCameras.map { it.friendlyName }}")
     }
 
     private fun attachDevice(descriptor: Device.Descriptor, onAttached: (device: Device) -> Unit) {
@@ -393,19 +422,6 @@ class BroadcastManager(private val context: Application) {
             session?.mixer?.bind(cameraOffDevice, SLOT_DEFAULT)
         }
         reloadDevices()
-    }
-
-    private fun displayCameraOutput() {
-        (cameraDevice as? ImageDevice)?.getPreviewView(BroadcastConfiguration.AspectMode.FILL)?.run {
-            launchMain {
-                Timber.d("Camera output ready")
-                layoutParams = ViewGroup.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT
-                )
-                _onPreviewUpdated.tryEmit(this@run)
-            }
-        }
     }
 
     private fun resetTimer() {

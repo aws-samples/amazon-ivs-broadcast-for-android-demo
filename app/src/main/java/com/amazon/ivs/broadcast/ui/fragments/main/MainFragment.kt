@@ -306,21 +306,6 @@ class MainFragment : BaseFragment() {
         }
     }
 
-    private fun updateSideSheetState() {
-        val transition = when (binding.broadcastSideSheet.motionLayout.currentState) {
-            R.id.menu_full_open -> R.id.transition_full_open_to_half_open
-            R.id.menu_half_open -> R.id.transition_half_open_to_close
-            else -> R.id.transition_closed_to_half_open
-        }
-        binding.broadcastSideSheet.motionLayout.setTransition(transition)
-        binding.broadcastSideSheet.motionLayout.transitionToEnd()
-    }
-
-    private fun onSettingsClick() {
-        binding.defaultSlotContainer.removeAllViews()
-        openFragment(R.id.navigation_settings)
-    }
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -335,6 +320,47 @@ class MainFragment : BaseFragment() {
         if (isLandscape) {
             binding.debugInfo.setVisible(false)
         }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        isInPipMode = isInPictureInPictureMode
+        viewModel.reloadDevices()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.reloadPreview()
+    }
+
+    fun onBackPressed(): Boolean {
+        return if (viewModel.isStreamOnline && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val params = PictureInPictureParams.Builder()
+            params.setAspectRatio(
+                Rational(
+                    configurationViewModel.resolution.width.toInt(),
+                    configurationViewModel.resolution.height.toInt()
+                )
+            )
+            activity?.enterPictureInPictureMode(params.build())
+            false
+        } else {
+            true
+        }
+    }
+
+    private fun updateSideSheetState() {
+        val transition = when (binding.broadcastSideSheet.motionLayout.currentState) {
+            R.id.menu_full_open -> R.id.transition_full_open_to_half_open
+            R.id.menu_half_open -> R.id.transition_half_open_to_close
+            else -> R.id.transition_closed_to_half_open
+        }
+        binding.broadcastSideSheet.motionLayout.setTransition(transition)
+        binding.broadcastSideSheet.motionLayout.transitionToEnd()
+    }
+
+    private fun onSettingsClick() {
+        binding.defaultSlotContainer.removeAllViews()
+        openFragment(R.id.navigation_settings)
     }
 
     private fun changeMiniPlayerConstraints(isLandscape: Boolean = requireContext().isViewLandscape()) {
@@ -357,27 +383,6 @@ class MainFragment : BaseFragment() {
             miniContainerParams.marginEnd = resources.getDimension(R.dimen.broadcast_margin_big).toInt()
         }
         binding.broadcastSideSheet.miniPreviewContainerLandscape.layoutParams = miniContainerParams
-    }
-
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
-        isInPipMode = isInPictureInPictureMode
-        viewModel.reloadDevices()
-    }
-
-    fun onBackPressed(): Boolean {
-        return if (viewModel.isStreamOnline && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val params = PictureInPictureParams.Builder()
-            params.setAspectRatio(
-                Rational(
-                    configurationViewModel.resolution.width.toInt(),
-                    configurationViewModel.resolution.height.toInt()
-                )
-            )
-            activity?.enterPictureInPictureMode(params.build())
-            false
-        } else {
-            true
-        }
     }
 
     private fun onInviteToWatchClick() {
