@@ -30,6 +30,6 @@ class ConsumableLiveData<T> : MutableLiveData<Consumable<T>>() {
     }
 
     inline fun observeConsumable(owner: LifecycleOwner, crossinline onConsumed: (T) -> Unit) {
-        observe(owner, { it?.consume()?.let(onConsumed) })
+        observe(owner) { it?.consume()?.let(onConsumed) }
     }
 }

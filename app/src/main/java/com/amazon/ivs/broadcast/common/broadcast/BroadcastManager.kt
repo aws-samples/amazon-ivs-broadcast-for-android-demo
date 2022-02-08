@@ -183,6 +183,9 @@ class BroadcastManager(private val context: Application) {
             cameraDevice?.run { detachDevice(this) }
             microphoneDevice?.run { detachDevice(this) }
             cameraOffDevice?.run { detachDevice(this) }
+            screenDevices.forEach { device ->
+                detachDevice(device)
+            }
             stopSystemCapture()
             stop()
             release()
@@ -194,6 +197,7 @@ class BroadcastManager(private val context: Application) {
         cameraOffDevice = null
         cameraOffBitmap = null
         session = null
+        screenDevices.clear()
         if (releasingSession) {
             Timber.d("Session released")
         }
@@ -242,26 +246,13 @@ class BroadcastManager(private val context: Application) {
     fun toggleVideo(bitmap: Bitmap) {
         cameraOffBitmap = bitmap
         isVideoMuted = !isVideoMuted
-        if (isVideoMuted) {
-            drawCameraOff()
-        } else {
-            reloadDevices()
-        }
+        drawCameraOff(isVideoMuted)
         _onVideoMuted.tryEmit(isVideoMuted)
         Timber.d("Toggled video state: $isVideoMuted")
     }
 
     fun reloadDevices() {
         Timber.d("Reloading devices")
-        if (isVideoMuted) {
-            session?.mixer?.removeSlot(SLOT_DEFAULT)
-        } else {
-            if (isScreenShareEnabled) {
-                session?.mixer?.addSlot(configuration.screenShareSlots[0])
-            } else {
-                session?.mixer?.addSlot(configuration.defaultSlot)
-            }
-        }
         session?.listAttachedDevices()?.forEach { device ->
             Timber.d("Detaching device: ${device.descriptor.deviceId}, ${device.descriptor.friendlyName}, ${device.descriptor.type}")
             session?.detachDevice(device)
@@ -307,7 +298,6 @@ class BroadcastManager(private val context: Application) {
                 Timber.d("Screen share device added: ${device.descriptor.friendlyName} to slot: $boundState")
             }
             screenDevices = devices
-            reloadDevices()
         }
     }
 
@@ -325,11 +315,7 @@ class BroadcastManager(private val context: Application) {
             session?.detachDevice(device)
         }
         screenDevices.clear()
-        if (isVideoMuted) {
-            drawCameraOff()
-        } else {
-            reloadDevices()
-        }
+        drawCameraOff(isVideoMuted)
     }
 
     fun displayCameraOutput() {
@@ -363,6 +349,7 @@ class BroadcastManager(private val context: Application) {
         var cameraFound = false
         var microphoneFound = false
         val availableCameras = mutableListOf<Device.Descriptor>()
+        cameraOffDevice = session?.createImageInputSource()
         BroadcastSession.listAvailableDevices(context).forEach { descriptor ->
             if (descriptor.type == Device.Descriptor.DeviceType.CAMERA) {
                 val isAcceptableDevice = (configuration.defaultCameraId != null
@@ -388,7 +375,6 @@ class BroadcastManager(private val context: Application) {
                 }
             }
         }
-        cameraOffDevice = session?.createImageInputSource()
         _onDevicesListed.tryEmit(availableCameras.map { DeviceItem(it.type.name, it.deviceId, it.position.name) })
         Timber.d("Initial devices attached: ${availableCameras.map { it.friendlyName }}")
     }
@@ -401,29 +387,29 @@ class BroadcastManager(private val context: Application) {
         }
     }
 
-    private fun drawCameraOff() = launchMain {
-        if (cameraOffBitmap == null) return@launchMain
-        Timber.d("Showing camera off")
-        cameraOffDevice?.run {
-            session?.detachDevice(this)
-        }
-        val canvas = cameraOffDevice?.inputSurface?.lockCanvas(null)
-        val paint = Paint()
-        paint.style = Paint.Style.FILL
-        paint.color = Color.rgb(0, 0, 0)
-        val centerX = (configuration.resolution.width - cameraOffBitmap!!.width) / 2
-        val centerY = (configuration.resolution.height - cameraOffBitmap!!.height) / 2
-
-        canvas?.drawRect(0f, 0f, configuration.resolution.width, configuration.resolution.height, paint)
-        canvas?.drawBitmap(cameraOffBitmap!!, centerX, centerY, Paint())
-        cameraOffDevice?.inputSurface?.unlockCanvasAndPost(canvas)
-
-        val binding = session?.mixer?.getDeviceBinding(cameraOffDevice)
-        if (binding != SLOT_DEFAULT) {
-            Timber.d("Binding camera off device to default slot")
+    private fun drawCameraOff(isVideoMuted: Boolean) = launchMain {
+        if (isVideoMuted) {
+            Timber.d("Binding OFF device")
+            session?.mixer?.unbind(cameraDevice)
             session?.mixer?.bind(cameraOffDevice, SLOT_DEFAULT)
+
+            if (cameraOffBitmap == null) return@launchMain
+            val canvas = cameraOffDevice?.inputSurface?.lockCanvas(null)
+            val paint = Paint()
+            paint.style = Paint.Style.FILL
+            paint.color = Color.rgb(0, 0, 0)
+            val centerX = (configuration.resolution.width - cameraOffBitmap!!.width) / 2
+            val centerY = (configuration.resolution.height - cameraOffBitmap!!.height) / 2
+
+            canvas?.drawRect(0f, 0f, configuration.resolution.width, configuration.resolution.height, paint)
+            canvas?.drawBitmap(cameraOffBitmap!!, centerX, centerY, Paint())
+            cameraOffDevice?.inputSurface?.unlockCanvasAndPost(canvas)
+        } else {
+            Timber.d("Binding Camera device")
+            session?.mixer?.unbind(cameraOffDevice)
+            session?.mixer?.bind(cameraDevice, SLOT_DEFAULT)
         }
-        reloadDevices()
+        displayCameraOutput()
     }
 
     private fun resetTimer() {

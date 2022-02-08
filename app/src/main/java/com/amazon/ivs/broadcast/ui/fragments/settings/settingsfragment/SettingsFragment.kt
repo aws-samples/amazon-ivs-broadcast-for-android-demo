@@ -162,10 +162,10 @@ class SettingsFragment : BaseFragment() {
             }
         }
 
-        binding.createChannel.createLinks(Pair(getString(R.string.link_amazon_channel), {
+        binding.createChannel.createLinks(Pair(getString(R.string.link_amazon_channel)) {
             configurationViewModel.webViewUrl = AMAZON_IVS_URL
             openFragment(R.id.navigation_web_view)
-        }))
+        })
 
         binding.defaultCameraContainer.setOnClickListener {
             binding.root.showCameraDialog(getString(R.string.orientation), configurationViewModel.camerasList) { option ->
