@@ -4,6 +4,7 @@ import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.cache.PREFERENCES_NAME
 import com.amazon.ivs.broadcast.cache.PreferenceProvider
 import com.amazon.ivs.broadcast.cache.SecuredPreferenceProvider
+import com.amazon.ivs.broadcast.common.broadcast.BroadcastManager
 import dagger.Module
 import dagger.Provides
 
@@ -19,4 +20,8 @@ class InjectionModule(private val context: App) {
     @Singleton
     @Provides
     fun provideSecuredPreferences() = SecuredPreferenceProvider(context)
+
+    @Singleton
+    @Provides
+    fun provideBroadcastManager() = BroadcastManager(context)
 }

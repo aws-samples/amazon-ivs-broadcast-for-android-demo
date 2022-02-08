@@ -8,6 +8,8 @@ import android.content.res.Configuration
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Rational
 import android.view.LayoutInflater
 import android.view.TextureView
@@ -20,8 +22,10 @@ import androidx.core.view.drawToBitmap
 import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.*
+import com.amazon.ivs.broadcast.common.broadcast.BroadcastState
 import com.amazon.ivs.broadcast.databinding.FragmentMainBinding
 import com.amazon.ivs.broadcast.models.Orientation
+import com.amazon.ivs.broadcast.models.ui.DeviceHealth
 import com.amazon.ivs.broadcast.models.ui.PopupModel
 import com.amazon.ivs.broadcast.models.ui.PopupType
 import com.amazon.ivs.broadcast.models.ui.StreamTopBarModel
@@ -37,10 +41,6 @@ class MainFragment : BaseFragment() {
 
     private lateinit var binding: FragmentMainBinding
     private var isInPipMode = false
-    private val viewModel by lazyViewModel(
-        { requireActivity().application as App },
-        { MainViewModel(requireActivity().application, configurationViewModel) }
-    )
 
     private val bottomSheet: BottomSheetBehavior<View> by lazy {
         BottomSheetBehavior.from(binding.broadcastBottomSheet.root)
@@ -55,6 +55,22 @@ class MainFragment : BaseFragment() {
             }
         }
 
+    private var deviceHealth = DeviceHealth()
+    private val deviceHealthHandler = Handler(Looper.getMainLooper())
+    private var deviceHealthRunnable = object : Runnable {
+        override fun run() {
+            try {
+                deviceHealth = DeviceHealth(
+                    requireContext().getUsedMemory(),
+                    requireContext().getCpuTemperature()
+                )
+                binding.deviceHealthUpdate = deviceHealth
+            } finally {
+                deviceHealthHandler.postDelayed(this, 1000)
+            }
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMainBinding.inflate(inflater, container, false)
         App.component.inject(this)
@@ -65,24 +81,26 @@ class MainFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated")
+        deviceHealthRunnable.run()
 
         preferences.isOnboardingDone = true
         configurationViewModel.resolution.orientation = configurationViewModel.orientationId
         updateControlPanelVisibility(requireContext().isViewLandscape(), true)
-        if (!viewModel.isStreamOnline()) {
+        if (!viewModel.isStreamOnline) {
             configurationViewModel.isLandscape = requireContext().isViewLandscape()
             viewModel.resetSession()
+            viewModel.createSession()
             configurationViewModel.isConfigurationChanged = false
-            binding.videoConfiguration = configurationViewModel.newestConfiguration.video
+            binding.videoConfiguration = viewModel.currentConfiguration.video
             binding.topBarUpdate = StreamTopBarModel(streamStatus = DISCONNECTED)
         } else {
-            binding.videoConfiguration = viewModel.sessionConfiguration.consumedValue?.video
+            binding.videoConfiguration = viewModel.currentConfiguration.video
             viewModel.reloadDevices()
         }
 
         binding.isStreamMuted = viewModel.isStreamMuted
         binding.isCameraOff = viewModel.isCameraOff
-        binding.isScreenCaptureOn = viewModel.isScreenCaptureEnabled()
+        binding.isScreenCaptureOn = viewModel.isScreenShareEnabled
         binding.useCustomResolution = configurationViewModel.useCustomResolution
         binding.broadcastBottomSheet.showDebugInfo.setVisible(configurationViewModel.developerMode)
 
@@ -212,30 +230,25 @@ class MainFragment : BaseFragment() {
         }
 
         binding.copyButton.setOnClickListener {
-            val deviceHealth = viewModel.onDeviceHealthUpdate.consumedValue
             val json = JsonObject()
-            json.addProperty("MEM", deviceHealth?.usedMemory)
-            json.addProperty("TEMP", deviceHealth?.cpuTemp)
-            json.add("VideoConfig", Gson().toJsonTree(viewModel.sessionConfiguration.consumedValue?.video))
+            json.addProperty("MEM", deviceHealth.usedMemory)
+            json.addProperty("TEMP", deviceHealth.cpuTemp)
+            json.add("VideoConfig", Gson().toJsonTree(viewModel.currentConfiguration.video))
             copyToClipBoard(json.toString())
         }
 
-        viewModel.sessionConfiguration.observeConsumable(this) { config ->
-            binding.videoConfiguration = config.video
+        viewModel.onError.collectUI(this) { error ->
+            showPopup(PopupModel(getString(R.string.error), getString(error.error), PopupType.ERROR))
         }
 
-        viewModel.errorHappened.observeConsumable(this) { error ->
-            showPopup(PopupModel(getString(R.string.error), error.second, PopupType.ERROR))
-        }
-
-        viewModel.isScreenShareEnabled.observeConsumable(viewLifecycleOwner) { isScreenCaptureOn ->
-            Timber.d("On stream mode changed: IS screenshare on $isScreenCaptureOn")
+        viewModel.onScreenShareEnabled.collectUI(this) { isScreenCaptureOn ->
+            Timber.d("On stream mode changed: Is screen share on $isScreenCaptureOn")
             binding.isScreenCaptureOn = isScreenCaptureOn
             changeMiniPlayerConstraints()
             when {
-                isScreenCaptureOn && !viewModel.isStreamOnline() -> showOfflineScreenShareAlert()
-                !isScreenCaptureOn && !viewModel.isStreamOnline() -> clearPopUp()
-                !isScreenCaptureOn && viewModel.isStreamOnline() && viewModel.isCameraOff -> {
+                isScreenCaptureOn && !viewModel.isStreamOnline -> showOfflineScreenShareAlert()
+                !isScreenCaptureOn && !viewModel.isStreamOnline -> clearPopUp()
+                !isScreenCaptureOn && viewModel.isStreamOnline && viewModel.isCameraOff -> {
                     binding.cameraOffSlotContainer.doOnLayout {
                         scaleToMatchResolution(it)
                     }
@@ -243,20 +256,31 @@ class MainFragment : BaseFragment() {
             }
         }
 
-        viewModel.onStreamStatusChanged.observeConsumable(viewLifecycleOwner) { streamStatus ->
-            when (streamStatus) {
-                CONNECTING -> {
+        viewModel.onAudioMuted.collectUI(this) { muted ->
+            binding.isStreamMuted = muted
+        }
+
+        viewModel.onVideoMuted.collectUI(this) { muted ->
+            Timber.d("Video muted: $muted")
+            if (muted) {
+                binding.isCameraOff = muted
+            }
+        }
+
+        viewModel.onBroadcastState.collectUI(this) { state ->
+            when (state) {
+                BroadcastState.BROADCAST_STARTED -> {
                     binding.topBarUpdate = StreamTopBarModel(
                         streamStatus = CONNECTING,
                         pillBackground = R.drawable.bg_connecting_pill
                     )
                 }
-                DISCONNECTED -> {
+                BroadcastState.BROADCAST_ENDED -> {
                     binding.topBarUpdate = StreamTopBarModel(
                         streamStatus = DISCONNECTED,
                         pillBackground = R.drawable.bg_offline_pill
                     )
-                    if (viewModel.isScreenCaptureEnabled()) {
+                    if (viewModel.isScreenShareEnabled) {
                         showOfflineScreenShareAlert()
                     }
                 }
@@ -264,7 +288,7 @@ class MainFragment : BaseFragment() {
             }
         }
 
-        viewModel.onStreamDataChanged.observeConsumable(viewLifecycleOwner) { topBarModel ->
+        viewModel.onStreamDataChanged.collectUI(this) { topBarModel ->
             binding.topBarUpdate = StreamTopBarModel(
                 formattedTime = formatTime(topBarModel.seconds),
                 formattedNetwork = formatTopBarNetwork(topBarModel.usedMegaBytes),
@@ -276,16 +300,51 @@ class MainFragment : BaseFragment() {
             }
         }
 
-        viewModel.onDeviceHealthUpdate.observeConsumable(viewLifecycleOwner) { deviceHealth ->
-            binding.deviceHealthUpdate = deviceHealth
-        }
-
-        viewModel.cameraPreview.observeConsumable(viewLifecycleOwner) { textureView ->
+        viewModel.onPreviewUpdated.collectUI(this) { textureView ->
             switchStreamContainer(textureView)
-        }
-
-        viewModel.onDevicesReloaded.observeConsumable(viewLifecycleOwner) {
             binding.isCameraOff = viewModel.isCameraOff
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
+        updateControlPanelVisibility(isLandscape)
+        binding.isViewLandscape = isLandscape
+        binding.constraintLayout.onDrawn {
+            if (viewModel.isScreenShareEnabled) {
+                changeMiniPlayerConstraints(isLandscape)
+            }
+            viewModel.onConfigurationChanged(isLandscape)
+        }
+        if (isLandscape) {
+            binding.debugInfo.setVisible(false)
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        isInPipMode = isInPictureInPictureMode
+        viewModel.reloadDevices()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.reloadPreview()
+    }
+
+    fun onBackPressed(): Boolean {
+        return if (viewModel.isStreamOnline && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val params = PictureInPictureParams.Builder()
+            params.setAspectRatio(
+                Rational(
+                    configurationViewModel.resolution.width.toInt(),
+                    configurationViewModel.resolution.height.toInt()
+                )
+            )
+            activity?.enterPictureInPictureMode(params.build())
+            false
+        } else {
+            true
         }
     }
 
@@ -302,22 +361,6 @@ class MainFragment : BaseFragment() {
     private fun onSettingsClick() {
         binding.defaultSlotContainer.removeAllViews()
         openFragment(R.id.navigation_settings)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        val isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
-        updateControlPanelVisibility(isLandscape)
-        binding.isViewLandscape = isLandscape
-        binding.constraintLayout.onDrawn {
-            if (viewModel.isScreenCaptureEnabled()) {
-                changeMiniPlayerConstraints(isLandscape)
-            }
-            viewModel.onConfigurationChanged(isLandscape)
-        }
-        if (isLandscape) {
-            binding.debugInfo.setVisible(false)
-        }
     }
 
     private fun changeMiniPlayerConstraints(isLandscape: Boolean = requireContext().isViewLandscape()) {
@@ -340,27 +383,6 @@ class MainFragment : BaseFragment() {
             miniContainerParams.marginEnd = resources.getDimension(R.dimen.broadcast_margin_big).toInt()
         }
         binding.broadcastSideSheet.miniPreviewContainerLandscape.layoutParams = miniContainerParams
-    }
-
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
-        isInPipMode = isInPictureInPictureMode
-        viewModel.reloadDevices()
-    }
-
-    fun onBackPressed(): Boolean {
-        return if (viewModel.isStreamOnline() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val params = PictureInPictureParams.Builder()
-            params.setAspectRatio(
-                Rational(
-                    configurationViewModel.resolution.width.toInt(),
-                    configurationViewModel.resolution.height.toInt()
-                )
-            )
-            activity?.enterPictureInPictureMode(params.build())
-            false
-        } else {
-            true
-        }
     }
 
     private fun onInviteToWatchClick() {
@@ -405,7 +427,7 @@ class MainFragment : BaseFragment() {
                       PopupType.SUCCESS
                   )
               )
-          } else if (!viewModel.isStreamOnline()) {
+          } else if (!viewModel.isStreamOnline) {
               showPopup(
                   PopupModel(
                       getString(R.string.error),
@@ -419,25 +441,29 @@ class MainFragment : BaseFragment() {
     }
 
     private fun onGoLiveButtonClick() {
-        if (viewModel.isStreamOnline()) {
+        Timber.d("Will start stream: ${!viewModel.isStreamOnline}")
+        if (viewModel.isStreamOnline) {
             viewModel.resetSession()
+            viewModel.createSession()
         } else {
             viewModel.startStream()
         }
     }
 
     private fun onMuteButtonClick() {
-        viewModel.toggleMute { muted ->
-            binding.isStreamMuted = muted
-        }
+        viewModel.toggleMute()
     }
 
     private fun onFlipCameraButtonClick() {
+        binding.broadcastBottomSheet.broadcastFlip.disableAndEnable()
+        binding.broadcastSideSheet.broadcastFlip.disableAndEnable()
         viewModel.switchCameraDirection()
     }
 
-    private fun onCameraButtonClick() = launchMain {
-        if (viewModel.isScreenCaptureEnabled()) {
+    private fun onCameraButtonClick() {
+        binding.broadcastBottomSheet.broadcastCamera.disableAndEnable()
+        binding.broadcastSideSheet.broadcastCamera.disableAndEnable()
+        if (viewModel.isScreenShareEnabled) {
             binding.miniCameraOffSlotContainer.doOnLayout {
                 viewModel.toggleCamera(binding.miniCameraOffSlotContainer.drawToBitmap())
             }
@@ -448,34 +474,32 @@ class MainFragment : BaseFragment() {
         }
     }
 
-    private fun switchStreamContainer(
-        textureView: TextureView? = viewModel.cameraPreview.consumedValue
-    ) {
-        textureView?.let { _ ->
-            binding.broadcastSideSheet.defaultSlotContainerLandscape.removeAllViews()
-            binding.defaultSlotContainer.removeAllViews()
-            binding.broadcastSideSheet.miniPreview.removeAllViews()
-            binding.miniPreview.removeAllViews()
-            binding.pipPreviewContainer.removeAllViews()
-            Timber.d("Add preview to container")
-            when {
-                isInPipMode -> binding.pipPreviewContainer.addView(textureView)
-                !isInPipMode && viewModel.isScreenCaptureEnabled() -> {
-                    if (requireContext().isViewLandscape()) {
-                        binding.broadcastSideSheet.miniPreview.addView(textureView)
-                    } else {
-                        binding.miniPreview.addView(textureView)
-                    }
+    private fun switchStreamContainer(textureView: TextureView?) {
+        binding.broadcastSideSheet.defaultSlotContainerLandscape.removeAllViews()
+        binding.defaultSlotContainer.removeAllViews()
+        binding.broadcastSideSheet.miniPreview.removeAllViews()
+        binding.miniPreview.removeAllViews()
+        binding.pipPreviewContainer.removeAllViews()
+        if (textureView == null) return
+        Timber.d("Add preview to container")
+        when {
+            isInPipMode -> binding.pipPreviewContainer.addView(textureView)
+            !isInPipMode && viewModel.isScreenShareEnabled -> {
+                if (requireContext().isViewLandscape()) {
+                    binding.broadcastSideSheet.miniPreview.addView(textureView)
+                } else {
+                    binding.miniPreview.addView(textureView)
                 }
-                else -> {
-                    if (configurationViewModel.orientationId != Orientation.AUTO.id) {
-                        scaleToMatchResolution(textureView)
-                    }
-                    if (requireContext().isViewLandscape()) {
-                        binding.broadcastSideSheet.defaultSlotContainerLandscape.addView(textureView)
-                    } else {
-                        binding.defaultSlotContainer.addView(textureView)
-                    }
+            }
+            else -> {
+                if (configurationViewModel.orientationId != Orientation.AUTO.id) {
+                    scaleToMatchResolution(textureView)
+                }
+                if (requireContext().isViewLandscape()) {
+                    binding.broadcastSideSheet.defaultSlotContainerLandscape.addView(textureView)
+                } else {
+                    Timber.d("Adding preview to default slot container")
+                    binding.defaultSlotContainer.addView(textureView)
                 }
             }
         }
@@ -502,7 +526,7 @@ class MainFragment : BaseFragment() {
         binding.popupUpdate = popupUpdateModel
         binding.popupContainer.setVisible()
         if (setTimer) {
-            launchMain {
+            launchUI {
                 delay(POPUP_DURATION)
                 clearPopUp()
             }
@@ -514,8 +538,8 @@ class MainFragment : BaseFragment() {
     }
 
     private fun scaleToMatchResolution(view: View) {
-        val container =
-            if (requireContext().isViewLandscape()) binding.broadcastSideSheet.streamContainerLandscape else binding.streamContainer
+        val container = if (requireContext().isViewLandscape()) binding.broadcastSideSheet.streamContainerLandscape else
+            binding.streamContainer
         val screenWidth = container.width
         val screenHeight = container.height
         var width = 1 * configurationViewModel.resolution.widthAgainstHeightRatio

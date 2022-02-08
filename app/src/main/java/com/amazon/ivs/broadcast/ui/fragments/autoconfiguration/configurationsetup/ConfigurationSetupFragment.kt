@@ -18,7 +18,7 @@ import kotlinx.coroutines.delay
 class ConfigurationSetupFragment : BaseFragment() {
 
     private lateinit var binding: FragmentConfigurationSetupBinding
-    private val viewModel by lazyViewModel(
+    private val autoConfigurationViewModel by lazyViewModel(
         { requireActivity().application as App },
         { AutoConfigurationViewModel() }
     )
@@ -39,10 +39,10 @@ class ConfigurationSetupFragment : BaseFragment() {
         binding.runConfiguration.isEnabled = checkIfInputsAreSet()
 
         clearPopUp()
-        if (viewModel.rerunConfiguration) {
+        if (autoConfigurationViewModel.rerunConfiguration) {
             binding.testProgress.progress = 0
             startTest()
-            viewModel.rerunConfiguration = false
+            autoConfigurationViewModel.rerunConfiguration = false
         } else {
             binding.isTestActive = false
         }
@@ -82,14 +82,14 @@ class ConfigurationSetupFragment : BaseFragment() {
         }
 
         binding.runConfiguration.setOnClickListener {
-            viewModel.isRunnedFromSettingsView = false
-            viewModel.rerunConfiguration = true
+            autoConfigurationViewModel.isRunnedFromSettingsView = false
+            autoConfigurationViewModel.rerunConfiguration = true
             startTest()
         }
 
         binding.cancelConfiguration.setOnClickListener {
-            viewModel.stopTest()
-            if (viewModel.isRunnedFromSettingsView) {
+            autoConfigurationViewModel.stopTest()
+            if (autoConfigurationViewModel.isRunnedFromSettingsView) {
                 openFragment(R.id.navigation_settings)
             } else {
                 binding.isTestActive = false
@@ -102,11 +102,11 @@ class ConfigurationSetupFragment : BaseFragment() {
             clearPopUp()
         }
 
-        viewModel.testProgress.observeConsumable(viewLifecycleOwner) { progress ->
+        autoConfigurationViewModel.testProgress.observeConsumable(viewLifecycleOwner) { progress ->
             binding.testProgress.progress = progress
         }
 
-        viewModel.onWarningReceived.observeConsumable(viewLifecycleOwner) {
+        autoConfigurationViewModel.onWarningReceived.observeConsumable(viewLifecycleOwner) {
             if (binding.isTestActive == true) {
                 showPopup(
                     PopupModel(
@@ -118,16 +118,16 @@ class ConfigurationSetupFragment : BaseFragment() {
             }
         }
 
-        viewModel.testStatus.observeConsumable(viewLifecycleOwner) { status ->
+        autoConfigurationViewModel.testStatus.observeConsumable(viewLifecycleOwner) { status ->
             when (status) {
                 BroadcastSessionTest.Status.SUCCESS -> {
                     openFragment(R.id.navigation_configuration_summary)
-                    viewModel.stopTimer()
+                    autoConfigurationViewModel.stopTimer()
                     clearPopUp()
                 }
                 BroadcastSessionTest.Status.ERROR -> {
                     binding.isTestActive = false
-                    viewModel.stopTimer()
+                    autoConfigurationViewModel.stopTimer()
                     showPopup(
                         PopupModel(
                             getString(R.string.error),
@@ -143,10 +143,10 @@ class ConfigurationSetupFragment : BaseFragment() {
     }
 
     private fun startTest() {
-        viewModel.shouldTestContinue = true
+        autoConfigurationViewModel.shouldTestContinue = true
         binding.isTestActive = true
         clearPopUp()
-        viewModel.startTest(
+        autoConfigurationViewModel.startTest(
             configurationViewModel.ingestServerUrl,
             configurationViewModel.streamKey,
             requireContext()
@@ -156,7 +156,7 @@ class ConfigurationSetupFragment : BaseFragment() {
     fun canGoBack(): Boolean {
         return if (binding.isTestActive == true) {
             binding.isTestActive = false
-            viewModel.shouldTestContinue = false
+            autoConfigurationViewModel.shouldTestContinue = false
             false
         } else {
             true
@@ -167,7 +167,7 @@ class ConfigurationSetupFragment : BaseFragment() {
         binding.popupUpdate = popupUpdateModel
         binding.popupContainer.setVisible()
         if (setTimer) {
-            launchMain {
+            launchUI {
                 delay(POPUP_DURATION)
                 clearPopUp()
             }

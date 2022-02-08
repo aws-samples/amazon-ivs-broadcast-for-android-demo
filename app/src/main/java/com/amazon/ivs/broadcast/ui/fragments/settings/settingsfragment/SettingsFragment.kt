@@ -186,7 +186,7 @@ class SettingsFragment : BaseFragment() {
         binding.popupUpdate = popupUpdateModel
         binding.popupContainer.setVisible()
         if (setTimer) {
-            launchMain {
+            launchUI {
                 delay(POPUP_DURATION)
                 clearPopUp()
             }

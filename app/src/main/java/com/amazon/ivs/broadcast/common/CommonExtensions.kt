@@ -27,6 +27,7 @@ import com.amazon.ivs.broadcast.models.Orientation.*
 import com.amazonaws.ivs.broadcast.BroadcastConfiguration
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.delay
 import java.io.RandomAccessFile
 
 fun AppCompatActivity.openFragment(id: Int) {
@@ -159,6 +160,12 @@ fun String.toBps(): Int {
 fun View.showSoftKeyboard() {
     val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+}
+
+fun View.disableAndEnable(millis: Long = DISABLE_DURATION) = launchMain {
+    isEnabled = false
+    delay(millis)
+    isEnabled = true
 }
 
 fun Context.isViewLandscape() = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE

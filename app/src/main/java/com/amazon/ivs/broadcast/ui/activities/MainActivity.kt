@@ -8,6 +8,7 @@ import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.cache.PreferenceProvider
 import com.amazon.ivs.broadcast.cache.SecuredPreferenceProvider
+import com.amazon.ivs.broadcast.common.broadcast.BroadcastManager
 import com.amazon.ivs.broadcast.common.getCurrentFragment
 import com.amazon.ivs.broadcast.common.lazyViewModel
 import com.amazon.ivs.broadcast.common.openFragment
@@ -25,11 +26,9 @@ import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var preferences: PreferenceProvider
-
-    @Inject
-    lateinit var securedPreferences: SecuredPreferenceProvider
+    @Inject lateinit var preferences: PreferenceProvider
+    @Inject lateinit var securedPreferences: SecuredPreferenceProvider
+    @Inject lateinit var broadcastManager: BroadcastManager
 
     private lateinit var binding: ActivityMainBinding
 
@@ -40,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
     private val mainViewModel by lazyViewModel(
         { application as App },
-        { MainViewModel(application, configurationViewModel) }
+        { MainViewModel(configurationViewModel, broadcastManager) }
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,8 +70,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mainViewModel.session?.release()
-        mainViewModel.session = null
+        mainViewModel.resetSession()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
