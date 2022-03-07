@@ -121,7 +121,7 @@ class ConfigurationViewModel(
         video.size = BroadcastConfiguration.Vec2(resolution.width, resolution.height)
         video.targetFramerate = framerate
         video.isUseAutoBitrate = autoAdjustBitrate
-        audio.setChannels(1)
+        audio.channels = 1
         mixer.slots = arrayOf(defaultSlot)
     }
 
