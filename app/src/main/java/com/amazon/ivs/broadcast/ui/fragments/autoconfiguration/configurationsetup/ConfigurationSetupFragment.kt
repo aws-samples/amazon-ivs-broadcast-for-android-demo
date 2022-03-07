@@ -47,10 +47,10 @@ class ConfigurationSetupFragment : BaseFragment() {
             binding.isTestActive = false
         }
 
-        binding.setupNote.createLinks(Pair(getString(R.string.link_amazon_channel), {
+        binding.setupNote.createLinks(Pair(getString(R.string.link_amazon_channel)) {
             configurationViewModel.webViewUrl = AMAZON_IVS_URL
             openFragment(R.id.navigation_web_view)
-        }))
+        })
 
         binding.skipConfiguration.setOnClickListener {
             openFragment(R.id.navigation_main)
@@ -63,7 +63,7 @@ class ConfigurationSetupFragment : BaseFragment() {
                 inputText = configurationViewModel.ingestServerUrl
             ) { url ->
                 configurationViewModel.ingestServerUrl = url
-                binding.setupIngestServerValue.text = if (url.isBlank()) getString(R.string.not_set) else url
+                binding.setupIngestServerValue.text = url.ifBlank { getString(R.string.not_set) }
                 binding.runConfiguration.isEnabled = checkIfInputsAreSet()
             }
         }
