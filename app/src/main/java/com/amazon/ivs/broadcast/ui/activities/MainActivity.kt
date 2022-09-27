@@ -2,6 +2,7 @@ package com.amazon.ivs.broadcast.ui.activities
 
 import android.content.res.Configuration
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.amazon.ivs.broadcast.App
@@ -51,21 +52,23 @@ class MainActivity : AppCompatActivity() {
         if (preferences.isOnboardingDone) {
             openFragment(R.id.navigation_main)
         }
-    }
 
-    override fun onBackPressed() {
-        getCurrentFragment()?.let { currentFragment ->
-            when (currentFragment) {
-                is SplashFragment -> finish()
-                is ConfigurationSetupFragment -> if (currentFragment.canGoBack()) openFragment(R.id.navigation_splash) else Unit
-                is ConfigurationSummaryFragment -> openFragment(R.id.navigation_configuration_setup)
-                is MainFragment -> if (currentFragment.onBackPressed()) finish() else Unit
-                is SettingsFragment -> openFragment(R.id.navigation_main)
-                is NetworkPropertiesFragment -> openFragment(R.id.navigation_settings)
-                is GraphicPropertiesFragment -> openFragment(R.id.navigation_settings)
-                else -> findNavController(R.id.nav_host_fragment).navigateUp()
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                getCurrentFragment()?.let { currentFragment ->
+                    when (currentFragment) {
+                        is SplashFragment -> finish()
+                        is ConfigurationSetupFragment -> if (currentFragment.canGoBack()) openFragment(R.id.navigation_splash) else Unit
+                        is ConfigurationSummaryFragment -> openFragment(R.id.navigation_configuration_setup)
+                        is MainFragment -> if (currentFragment.onBackPressed()) finish() else Unit
+                        is SettingsFragment -> openFragment(R.id.navigation_main)
+                        is NetworkPropertiesFragment -> openFragment(R.id.navigation_settings)
+                        is GraphicPropertiesFragment -> openFragment(R.id.navigation_settings)
+                        else -> findNavController(R.id.nav_host_fragment).navigateUp()
+                    }
+                }
             }
-        }
+        })
     }
 
     override fun onDestroy() {
