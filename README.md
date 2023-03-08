@@ -28,7 +28,7 @@ This repository contains a demo app, which shows how to use the Amazon IVS mobil
 3. Copy the _Ingest Server_ for the channel and paste it into the `SERVER_URL` field on line 18 between the two escaped quotes. The resulting line should look like the following: `buildConfigField "String", "SERVER_URL", "\"rtmps://<ingest_server_url>:443/app/\""`
 4. Copy the _Stream Key_ for the channel and paste it into the `STREAM_KEY` field on line 19 between the two escaped quotes.
 5. Copy the _Playback URL_ for the channel and paste it into the `PLAYBACK_URL` field on line 20 between the two escaped quotes.
-6. Android Studio will ask to sync the project since the grade file has been changed. Select `Sync now` to sync.
+6. Android Studio will ask to sync the project since the gradle file has been changed. Select `Sync now` to sync.
 7. Save and build the application.
 
 You can also change the values for any of these fields in the app settings once you have launched the app in the Android Emulator, or a physical Android device.
