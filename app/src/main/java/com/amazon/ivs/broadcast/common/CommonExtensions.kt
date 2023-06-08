@@ -199,3 +199,6 @@ fun BroadcastConfiguration.asString() = "Broadcast configuration:\n" +
         "Video.size: (${video.size.x}, ${video.size.x})\n" +
         "Video.targetFramerate: ${video.targetFramerate}\n" +
         "Mixer.slots.size: ${mixer.slots.size}\n"
+
+fun AppCompatActivity.isPermissionGranted(permissionId: String) =
+    this.checkCallingOrSelfPermission(permissionId) == PackageManager.PERMISSION_GRANTED

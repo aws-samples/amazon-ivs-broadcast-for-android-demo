@@ -6,22 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.*
 import com.amazon.ivs.broadcast.databinding.FragmentGraphicPropertiesBinding
 import com.amazon.ivs.broadcast.models.ui.PopupModel
 import com.amazon.ivs.broadcast.models.ui.PopupType
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
+@AndroidEntryPoint
 class GraphicPropertiesFragment : BaseFragment() {
 
     private lateinit var binding: FragmentGraphicPropertiesBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentGraphicPropertiesBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 

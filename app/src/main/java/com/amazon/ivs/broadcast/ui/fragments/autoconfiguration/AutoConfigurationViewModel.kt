@@ -4,13 +4,17 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.ViewModel
-import com.amazon.ivs.broadcast.common.ConsumableLiveData
 import com.amazon.ivs.broadcast.common.TIME_UNTIL_WARNING
 import com.amazon.ivs.broadcast.common.launch
 import com.amazon.ivs.broadcast.models.Recommendation
 import com.amazonaws.ivs.broadcast.BroadcastConfiguration
 import com.amazonaws.ivs.broadcast.BroadcastSession
 import com.amazonaws.ivs.broadcast.BroadcastSessionTest
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import timber.log.Timber
 
 class AutoConfigurationViewModel : ViewModel() {
@@ -19,18 +23,23 @@ class AutoConfigurationViewModel : ViewModel() {
     var shouldTestContinue = true
     var isRunnedFromSettingsView = false
 
-    val testStatus = ConsumableLiveData<BroadcastSessionTest.Status>()
-    val onWarningReceived = ConsumableLiveData<Unit>()
-    val testProgress = ConsumableLiveData<Int>()
-    val onRecommendationReceived = ConsumableLiveData<Recommendation>()
+    private val _testStatus = Channel<BroadcastSessionTest.Status>()
+    private val _onWarningReceived = Channel<Unit>()
+    private val _testProgress = Channel<Int>()
+    private val _onRecommendationReceived = MutableStateFlow<Recommendation?>(null)
 
     private var testSession: BroadcastSession? = null
     private val timerHandler = Handler(Looper.getMainLooper())
     private val timerRunnable = Runnable {
         run {
-            onWarningReceived.postConsumable(Unit)
+            _onWarningReceived.trySend(Unit)
         }
     }
+
+    val testStatus = _testStatus.receiveAsFlow()
+    val onWarningReceived = _onWarningReceived.receiveAsFlow()
+    val testProgress = _testProgress.receiveAsFlow()
+    val onRecommendationReceived = _onRecommendationReceived.asStateFlow()
 
     fun startTest(
         endpointUrl: String?,
@@ -55,13 +64,13 @@ class AutoConfigurationViewModel : ViewModel() {
                             initialBitrate,
                             maxBitrate
                         )
-                        onRecommendationReceived.postConsumable(recommendation)
+                        _onRecommendationReceived.update { recommendation }
                         Timber.d("Result: $recommendation")
                     }
 
-                    testProgress.postConsumable((result.progress * 100).toInt())
+                    _testProgress.send((result.progress * 100).toInt())
                     Timber.d("Progress: ${(result.progress * 100).toInt()} ${result.exception}")
-                    testStatus.postConsumable(result.status)
+                    _testStatus.send(result.status)
                 }
             }
         }

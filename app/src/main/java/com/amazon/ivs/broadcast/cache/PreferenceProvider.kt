@@ -14,7 +14,6 @@ const val PREFERENCES_NAME = "app_preferences"
 class PreferenceProvider(context: Context, preferencesName: String) {
 
     var isOnboardingDone by booleanPreference()
-
     var orientation by intPreference(Orientation.AUTO.id)
     var targetBitrate by intPreference(INITIAL_BPS)
     var customMinBitrate by intPreference(INITIAL_BPS)

@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.amazon.ivs.broadcast.App
+import androidx.fragment.app.activityViewModels
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.*
 import com.amazon.ivs.broadcast.databinding.FragmentSettingsBinding
@@ -12,20 +12,18 @@ import com.amazon.ivs.broadcast.models.ui.PopupModel
 import com.amazon.ivs.broadcast.models.ui.PopupType
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
 import com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.AutoConfigurationViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import timber.log.Timber
 
+@AndroidEntryPoint
 class SettingsFragment : BaseFragment() {
 
     private lateinit var binding: FragmentSettingsBinding
-    private val autoConfigurationViewModel by lazyViewModel(
-        { requireActivity().application as App },
-        { AutoConfigurationViewModel() }
-    )
+    private val autoConfigurationViewModel by activityViewModels<AutoConfigurationViewModel>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 

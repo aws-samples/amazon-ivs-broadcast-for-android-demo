@@ -19,7 +19,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.doOnLayout
 import androidx.core.view.drawToBitmap
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.*
 import com.amazon.ivs.broadcast.common.broadcast.BroadcastState
@@ -34,9 +33,11 @@ import com.amazonaws.ivs.broadcast.BroadcastSession.State.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import timber.log.Timber
 
+@AndroidEntryPoint
 class MainFragment : BaseFragment() {
 
     private lateinit var binding: FragmentMainBinding
@@ -73,7 +74,6 @@ class MainFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMainBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 
@@ -82,8 +82,9 @@ class MainFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("onViewCreated")
         deviceHealthRunnable.run()
+        viewModel.initializeConfiguration(configurationViewModel)
 
-        preferences.isOnboardingDone = true
+        configurationViewModel.isOnboardingDone = true
         configurationViewModel.resolution.orientation = configurationViewModel.orientationId
         updateControlPanelVisibility(requireContext().isViewLandscape(), true)
         if (!viewModel.isStreamOnline) {
@@ -237,11 +238,11 @@ class MainFragment : BaseFragment() {
             copyToClipBoard(json.toString())
         }
 
-        viewModel.onError.collectUI(this) { error ->
+        collect(viewModel.onError) { error ->
             showPopup(PopupModel(getString(R.string.error), getString(error.error), PopupType.ERROR))
         }
 
-        viewModel.onScreenShareEnabled.collectUI(this) { isScreenCaptureOn ->
+        collect(viewModel.onScreenShareEnabled) { isScreenCaptureOn ->
             Timber.d("On stream mode changed: Is screen share on $isScreenCaptureOn")
             binding.isScreenCaptureOn = isScreenCaptureOn
             changeMiniPlayerConstraints()
@@ -256,18 +257,18 @@ class MainFragment : BaseFragment() {
             }
         }
 
-        viewModel.onAudioMuted.collectUI(this) { muted ->
+        collect(viewModel.onAudioMuted) { muted ->
             binding.isStreamMuted = muted
         }
 
-        viewModel.onVideoMuted.collectUI(this) { muted ->
+        collect(viewModel.onVideoMuted) { muted ->
             Timber.d("Video muted: $muted")
             if (muted) {
-                binding.isCameraOff = muted
+                binding.isCameraOff = true
             }
         }
 
-        viewModel.onBroadcastState.collectUI(this) { state ->
+        collect(viewModel.onBroadcastState) { state ->
             when (state) {
                 BroadcastState.BROADCAST_STARTED -> {
                     binding.topBarUpdate = StreamTopBarModel(
@@ -288,21 +289,27 @@ class MainFragment : BaseFragment() {
             }
         }
 
-        viewModel.onStreamDataChanged.collectUI(this) { topBarModel ->
-            binding.topBarUpdate = StreamTopBarModel(
-                formattedTime = formatTime(topBarModel.seconds),
-                formattedNetwork = formatTopBarNetwork(topBarModel.usedMegaBytes),
-                streamStatus = CONNECTED,
-                pillBackground = R.drawable.bg_online_pill
-            )
-            if (binding.popupUpdate?.type == PopupType.WARNING) {
-                clearPopUp()
+        collect(viewModel.onStreamDataChanged) { topBarModel ->
+            topBarModel?.let {
+                binding.topBarUpdate = StreamTopBarModel(
+                    formattedTime = formatTime(topBarModel.seconds),
+                    formattedNetwork = formatTopBarNetwork(topBarModel.usedMegaBytes),
+                    streamStatus = CONNECTED,
+                    pillBackground = R.drawable.bg_online_pill
+                )
+                if (binding.popupUpdate?.type == PopupType.WARNING) {
+                    clearPopUp()
+                }
             }
         }
 
-        viewModel.onPreviewUpdated.collectUI(this) { textureView ->
+        collect(viewModel.onPreviewUpdated) { textureView ->
             switchStreamContainer(textureView)
             binding.isCameraOff = viewModel.isCameraOff
+        }
+
+        collect(viewModel.onDevicesListed) { devices ->
+            configurationViewModel.camerasList = devices
         }
     }
 
@@ -315,7 +322,8 @@ class MainFragment : BaseFragment() {
             if (viewModel.isScreenShareEnabled) {
                 changeMiniPlayerConstraints(isLandscape)
             }
-            viewModel.onConfigurationChanged(isLandscape)
+            configurationViewModel.isLandscape = isLandscape
+            viewModel.onConfigurationChanged()
         }
         if (isLandscape) {
             binding.debugInfo.setVisible(false)

@@ -1,7 +1,7 @@
 package com.amazon.ivs.broadcast.common.broadcast
 
-import android.app.Application
 import android.app.Notification
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -14,13 +14,28 @@ import android.view.TextureView
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.amazon.ivs.broadcast.R
-import com.amazon.ivs.broadcast.common.*
+import com.amazon.ivs.broadcast.common.BYTES_TO_MEGABYTES_FACTOR
+import com.amazon.ivs.broadcast.common.SLOT_DEFAULT
+import com.amazon.ivs.broadcast.common.asString
+import com.amazon.ivs.broadcast.common.getSessionUsedBytes
+import com.amazon.ivs.broadcast.common.launchMain
+import com.amazon.ivs.broadcast.common.slotNames
 import com.amazon.ivs.broadcast.models.ui.DeviceItem
 import com.amazon.ivs.broadcast.models.ui.StreamTopBarModel
 import com.amazon.ivs.broadcast.ui.activities.NotificationActivity
 import com.amazon.ivs.broadcast.ui.fragments.ConfigurationViewModel
-import com.amazonaws.ivs.broadcast.*
-import kotlinx.coroutines.flow.asSharedFlow
+import com.amazonaws.ivs.broadcast.BroadcastConfiguration
+import com.amazonaws.ivs.broadcast.BroadcastException
+import com.amazonaws.ivs.broadcast.BroadcastSession
+import com.amazonaws.ivs.broadcast.Device
+import com.amazonaws.ivs.broadcast.ErrorType
+import com.amazonaws.ivs.broadcast.ImageDevice
+import com.amazonaws.ivs.broadcast.SurfaceSource
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import timber.log.Timber
 
 private const val NOTIFICATION_CHANNEL_ID = "notificationId"
@@ -28,7 +43,8 @@ private const val NOTIFICATION_CHANNEL_NAME = "notificationName"
 
 enum class BroadcastError(val error: Int) {
     FATAL(R.string.error_fatal),
-    DEVICE_DISCONNECTED(R.string.error_device_disconnected)
+    DEVICE_DISCONNECTED(R.string.error_device_disconnected),
+    INVALID_CREDENTIALS(R.string.error_invalid_credentials)
 }
 
 enum class BroadcastState {
@@ -37,7 +53,7 @@ enum class BroadcastState {
     BROADCAST_ENDED,
 }
 
-class BroadcastManager(private val context: Application) {
+class BroadcastManager(private val context: Context) {
 
     private var isBackCamera = true
     private val cameraDirection get() = if (isBackCamera) Device.Descriptor.Position.BACK else Device.Descriptor.Position.FRONT
@@ -48,7 +64,12 @@ class BroadcastManager(private val context: Application) {
             try {
                 val usedMegaBytes = getSessionUsedBytes(startBytes) / BYTES_TO_MEGABYTES_FACTOR
                 timeInSeconds += 1
-                _onStreamDataChanged.tryEmit(StreamTopBarModel(seconds = timeInSeconds, usedMegaBytes = usedMegaBytes))
+                _onStreamDataChanged.update {
+                    StreamTopBarModel(
+                        seconds = timeInSeconds,
+                        usedMegaBytes = usedMegaBytes
+                    )
+                }
             } finally {
                 timerHandler.postDelayed(this, 1000)
             }
@@ -58,14 +79,14 @@ class BroadcastManager(private val context: Application) {
     private var timeInSeconds = 0
     private var currentState = BroadcastState.BROADCAST_ENDED
 
-    private var _onError = ConsumableSharedFlow<BroadcastError>()
-    private var _onBroadcastState = ConsumableSharedFlow<BroadcastState>()
-    private var _onStreamDataChanged = ConsumableSharedFlow<StreamTopBarModel>()
-    private var _onPreviewUpdated = ConsumableSharedFlow<TextureView?>()
-    private var _onAudioMuted = ConsumableSharedFlow<Boolean>(canReplay = true)
-    private var _onVideoMuted = ConsumableSharedFlow<Boolean>(canReplay = true)
-    private var _onScreenShareEnabled = ConsumableSharedFlow<Boolean>(canReplay = true)
-    private var _onDevicesListed = ConsumableSharedFlow<List<DeviceItem>>(canReplay = true)
+    private var _onError = Channel<BroadcastError>()
+    private var _onBroadcastState = MutableStateFlow(currentState)
+    private var _onStreamDataChanged = MutableStateFlow<StreamTopBarModel?>(null)
+    private var _onPreviewUpdated = MutableStateFlow<TextureView?>(null)
+    private var _onAudioMuted = MutableStateFlow(false)
+    private var _onVideoMuted = MutableStateFlow(false)
+    private var _onScreenShareEnabled = Channel<Boolean>()
+    private var _onDevicesListed = MutableStateFlow<List<DeviceItem>>(emptyList())
 
     private lateinit var configuration: ConfigurationViewModel
     private var session: BroadcastSession? = null
@@ -75,7 +96,7 @@ class BroadcastManager(private val context: Application) {
     private var cameraOffBitmap: Bitmap? = null
     private var screenDevices = mutableListOf<Device>()
 
-    private var broadcastListener = object: BroadcastSession.Listener() {
+    private var broadcastListener = object : BroadcastSession.Listener() {
         override fun onStateChanged(state: BroadcastSession.State) {
             Timber.d("Broadcast state changed: $state")
             when (state) {
@@ -83,16 +104,16 @@ class BroadcastManager(private val context: Application) {
                 BroadcastSession.State.DISCONNECTED,
                 BroadcastSession.State.ERROR -> {
                     currentState = BroadcastState.BROADCAST_ENDED
-                    _onBroadcastState.emitNew(currentState)
+                    _onBroadcastState.update { currentState }
                     resetTimer()
                 }
                 BroadcastSession.State.CONNECTING -> {
                     currentState = BroadcastState.BROADCAST_STARTING
-                    _onBroadcastState.emitNew(currentState)
+                    _onBroadcastState.update { currentState }
                 }
                 BroadcastSession.State.CONNECTED -> {
                     currentState = BroadcastState.BROADCAST_STARTED
-                    _onBroadcastState.emitNew(currentState)
+                    _onBroadcastState.update { currentState }
                     timerRunnable.run()
                 }
             }
@@ -131,14 +152,14 @@ class BroadcastManager(private val context: Application) {
                         }
                     } catch (e: BroadcastException) {
                         Timber.d(e, "Microphone exchange exception")
-                        _onError.tryEmit(BroadcastError.DEVICE_DISCONNECTED)
+                        _onError.trySend(BroadcastError.DEVICE_DISCONNECTED)
                     }
                 }
             } else if (error.error == ErrorType.ERROR_DEVICE_DISCONNECTED && microphoneDevice == null) {
-                _onError.tryEmit(BroadcastError.DEVICE_DISCONNECTED)
+                _onError.trySend(BroadcastError.DEVICE_DISCONNECTED)
             } else if (error.isFatal) {
                 error.printStackTrace()
-                _onError.tryEmit(BroadcastError.FATAL)
+                _onError.trySend(BroadcastError.FATAL)
             }
         }
     }
@@ -153,14 +174,14 @@ class BroadcastManager(private val context: Application) {
         private set
     val isStreamOnline get() = currentState == BroadcastState.BROADCAST_STARTED
 
-    val onError = _onError.asSharedFlow()
-    val onBroadcastState = _onBroadcastState.asSharedFlow()
-    val onPreviewUpdated = _onPreviewUpdated.asSharedFlow()
-    val onAudioMuted = _onAudioMuted.asSharedFlow()
-    val onVideoMuted = _onVideoMuted.asSharedFlow()
-    val onScreenShareEnabled = _onScreenShareEnabled.asSharedFlow()
-    val onStreamDataChanged = _onStreamDataChanged.asSharedFlow()
-    val onDevicesListed = _onDevicesListed.asSharedFlow()
+    val onError = _onError.receiveAsFlow()
+    val onBroadcastState = _onBroadcastState.asStateFlow()
+    val onPreviewUpdated = _onPreviewUpdated.asStateFlow()
+    val onAudioMuted = _onAudioMuted.asStateFlow()
+    val onVideoMuted = _onVideoMuted.asStateFlow()
+    val onScreenShareEnabled = _onScreenShareEnabled.receiveAsFlow()
+    val onStreamDataChanged = _onStreamDataChanged.asStateFlow()
+    val onDevicesListed = _onDevicesListed.asStateFlow()
 
     fun init(configuration: ConfigurationViewModel) {
         this.configuration = configuration
@@ -190,8 +211,8 @@ class BroadcastManager(private val context: Application) {
             stop()
             release()
         }
-        _onBroadcastState.tryEmit(BroadcastState.BROADCAST_ENDED)
-        _onPreviewUpdated.tryEmit(null)
+        _onBroadcastState.update { BroadcastState.BROADCAST_ENDED }
+        _onPreviewUpdated.update { null }
         cameraDevice = null
         microphoneDevice = null
         cameraOffDevice = null
@@ -205,7 +226,12 @@ class BroadcastManager(private val context: Application) {
 
     fun startStream() {
         Timber.d("Starting stream: ${configuration.ingestServerUrl}, ${configuration.streamKey}")
-        session?.start(configuration.ingestServerUrl, configuration.streamKey)
+        try {
+            session?.start(configuration.ingestServerUrl, configuration.streamKey)
+        } catch (e: BroadcastException) {
+            Timber.d("Stream error: ${e.detail}, ${e.code}")
+            _onError.trySend(BroadcastError.INVALID_CREDENTIALS)
+        }
     }
 
     fun flipCameraDirection() {
@@ -216,7 +242,7 @@ class BroadcastManager(private val context: Application) {
         if (!canFlip) return
         Timber.d("Switching camera direction from: $cameraDirection to: $newDirection")
         if (cameraDevice != null && newCamera != null) {
-            _onPreviewUpdated.tryEmit(null)
+            _onPreviewUpdated.update { null }
             session?.exchangeDevices(cameraDevice!!, newCamera) { device ->
                 Timber.d("Cameras exchanged from: ${cameraDevice?.descriptor?.friendlyName} to: ${device.descriptor.friendlyName}")
                 isBackCamera = !isBackCamera
@@ -240,14 +266,14 @@ class BroadcastManager(private val context: Application) {
                 }
             }
         }
-        _onAudioMuted.tryEmit(isAudioMuted)
+        _onAudioMuted.update { isAudioMuted }
     }
 
     fun toggleVideo(bitmap: Bitmap) {
         cameraOffBitmap = bitmap
         isVideoMuted = !isVideoMuted
         drawCameraOff(isVideoMuted)
-        _onVideoMuted.tryEmit(isVideoMuted)
+        _onVideoMuted.update { isVideoMuted }
         Timber.d("Toggled video state: $isVideoMuted")
     }
 
@@ -281,7 +307,7 @@ class BroadcastManager(private val context: Application) {
     fun startScreenCapture(data: Intent?) {
         Timber.d("Starting screen capture")
         isScreenShareEnabled = true
-        _onScreenShareEnabled.tryEmit(isScreenShareEnabled)
+        _onScreenShareEnabled.trySend(isScreenShareEnabled)
         slotNames.forEach { slot ->
             session?.mixer?.removeSlot(slot)?.takeIf { it }?.run {
                 Timber.d("Slot: $slot removed")
@@ -304,7 +330,7 @@ class BroadcastManager(private val context: Application) {
     fun stopScreenShare() {
         Timber.d("Stopping screen capture")
         isScreenShareEnabled = false
-        _onScreenShareEnabled.tryEmit(isScreenShareEnabled)
+        _onScreenShareEnabled.trySend(isScreenShareEnabled)
         session?.stopSystemCapture()
         slotNames.forEach { slot ->
             session?.mixer?.removeSlot(slot)
@@ -326,7 +352,7 @@ class BroadcastManager(private val context: Application) {
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT
                 )
-                _onPreviewUpdated.tryEmit(this@run)
+                _onPreviewUpdated.update { this@run }
             }
         }
     }
@@ -375,7 +401,7 @@ class BroadcastManager(private val context: Application) {
                 }
             }
         }
-        _onDevicesListed.tryEmit(availableCameras.map { DeviceItem(it.type.name, it.deviceId, it.position.name) })
+        _onDevicesListed.update { availableCameras.map { DeviceItem(it.type.name, it.deviceId, it.position.name) } }
         Timber.d("Initial devices attached: ${availableCameras.map { it.friendlyName }}")
     }
 

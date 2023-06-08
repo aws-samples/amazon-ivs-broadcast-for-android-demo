@@ -4,34 +4,31 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.amazon.ivs.broadcast.App
+import androidx.fragment.app.activityViewModels
 import com.amazon.ivs.broadcast.R
-import com.amazon.ivs.broadcast.common.lazyViewModel
 import com.amazon.ivs.broadcast.common.openFragment
 import com.amazon.ivs.broadcast.common.toFormattedGbPerHour
 import com.amazon.ivs.broadcast.common.toFormattedKbps
 import com.amazon.ivs.broadcast.databinding.FragmentConfigurationSummaryBinding
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
 import com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.AutoConfigurationViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ConfigurationSummaryFragment : BaseFragment() {
 
     private lateinit var binding: FragmentConfigurationSummaryBinding
-    private val autoConfigurationViewModel by lazyViewModel(
-        { requireActivity().application as App },
-        { AutoConfigurationViewModel() }
-    )
+    private val autoConfigurationViewModel by activityViewModels<AutoConfigurationViewModel>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentConfigurationSummaryBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        autoConfigurationViewModel.onRecommendationReceived.consumedValue?.run {
+        autoConfigurationViewModel.onRecommendationReceived.value?.run {
             configurationViewModel.recommendation = this
 
             binding.summaryBitrateValue.text = toFormattedKbps(targetBitrate)

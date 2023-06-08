@@ -1,17 +1,17 @@
 package com.amazon.ivs.broadcast.cache
 
+import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.BuildConfig
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 const val SECURED_PREFERENCES_NAME = "secured_preferences"
 
-class SecuredPreferenceProvider(val context: App) {
+class SecuredPreferenceProvider(val context: Context) {
 
     var serverUrl: String? by stringPreference(BuildConfig.SERVER_URL)
     var playbackUrl: String? by stringPreference(BuildConfig.PLAYBACK_URL)

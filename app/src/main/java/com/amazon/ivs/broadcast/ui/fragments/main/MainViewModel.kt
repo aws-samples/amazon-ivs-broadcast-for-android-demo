@@ -4,12 +4,13 @@ import android.content.Intent
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import com.amazon.ivs.broadcast.common.broadcast.*
-import com.amazon.ivs.broadcast.common.launch
 import com.amazon.ivs.broadcast.ui.fragments.ConfigurationViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
+import javax.inject.Inject
 
-class MainViewModel(
-    private val configurationViewModel: ConfigurationViewModel,
+@HiltViewModel
+class MainViewModel @Inject constructor(
     private val broadcastManager: BroadcastManager
 ) : ViewModel() {
 
@@ -26,14 +27,7 @@ class MainViewModel(
     val onError = broadcastManager.onError
     val onBroadcastState = broadcastManager.onBroadcastState
     val onStreamDataChanged = broadcastManager.onStreamDataChanged
-
-    init {
-        launch {
-            broadcastManager.onDevicesListed.collect { devices ->
-                configurationViewModel.camerasList = devices
-            }
-        }
-    }
+    val onDevicesListed = broadcastManager.onDevicesListed
 
     fun switchCameraDirection() = broadcastManager.flipCameraDirection()
 
@@ -41,9 +35,8 @@ class MainViewModel(
 
     fun toggleCamera(bitmap: Bitmap) = broadcastManager.toggleVideo(bitmap)
 
-    fun onConfigurationChanged(isLandscape: Boolean) {
+    fun onConfigurationChanged() {
         Timber.d("Configuration changed")
-        configurationViewModel.isLandscape = isLandscape
         reloadDevices()
     }
 
@@ -60,4 +53,8 @@ class MainViewModel(
     fun startStream() = broadcastManager.startStream()
 
     fun reloadPreview() = broadcastManager.displayCameraOutput()
+
+    fun initializeConfiguration(configuration: ConfigurationViewModel) {
+        broadcastManager.init(configuration)
+    }
 }

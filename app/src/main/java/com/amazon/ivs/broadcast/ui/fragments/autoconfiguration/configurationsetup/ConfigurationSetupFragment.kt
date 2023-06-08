@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.amazon.ivs.broadcast.App
+import androidx.fragment.app.activityViewModels
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.*
 import com.amazon.ivs.broadcast.databinding.FragmentConfigurationSetupBinding
@@ -13,19 +13,17 @@ import com.amazon.ivs.broadcast.models.ui.PopupType
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
 import com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.AutoConfigurationViewModel
 import com.amazonaws.ivs.broadcast.BroadcastSessionTest
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
+@AndroidEntryPoint
 class ConfigurationSetupFragment : BaseFragment() {
 
     private lateinit var binding: FragmentConfigurationSetupBinding
-    private val autoConfigurationViewModel by lazyViewModel(
-        { requireActivity().application as App },
-        { AutoConfigurationViewModel() }
-    )
+    private val autoConfigurationViewModel by activityViewModels<AutoConfigurationViewModel>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentConfigurationSetupBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 
@@ -102,11 +100,11 @@ class ConfigurationSetupFragment : BaseFragment() {
             clearPopUp()
         }
 
-        autoConfigurationViewModel.testProgress.observeConsumable(viewLifecycleOwner) { progress ->
+        collect(autoConfigurationViewModel.testProgress) { progress ->
             binding.testProgress.progress = progress
         }
 
-        autoConfigurationViewModel.onWarningReceived.observeConsumable(viewLifecycleOwner) {
+        collect(autoConfigurationViewModel.onWarningReceived) {
             if (binding.isTestActive == true) {
                 showPopup(
                     PopupModel(
@@ -118,7 +116,7 @@ class ConfigurationSetupFragment : BaseFragment() {
             }
         }
 
-        autoConfigurationViewModel.testStatus.observeConsumable(viewLifecycleOwner) { status ->
+        collect(autoConfigurationViewModel.testStatus) { status ->
             when (status) {
                 BroadcastSessionTest.Status.SUCCESS -> {
                     openFragment(R.id.navigation_configuration_summary)

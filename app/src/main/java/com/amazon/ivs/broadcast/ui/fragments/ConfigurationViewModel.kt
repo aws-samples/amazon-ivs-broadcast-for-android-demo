@@ -10,10 +10,13 @@ import com.amazon.ivs.broadcast.models.ResolutionModel
 import com.amazon.ivs.broadcast.models.ui.DeviceItem
 import com.amazonaws.ivs.broadcast.BroadcastConfiguration
 import com.amazonaws.ivs.broadcast.Device
+import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
+import javax.inject.Inject
 import kotlin.properties.Delegates
 
-class ConfigurationViewModel(
+@HiltViewModel
+class ConfigurationViewModel @Inject constructor(
     private val securedPreferences: SecuredPreferenceProvider,
     private val preferences: PreferenceProvider,
 ) : ViewModel() {
@@ -30,6 +33,9 @@ class ConfigurationViewModel(
     }
     var playbackUrl by Delegates.observable(securedPreferences.playbackUrl) { _, _, newValue ->
         securedPreferences.playbackUrl = newValue
+    }
+    var isOnboardingDone by Delegates.observable(preferences.isOnboardingDone) { _, _, newValue ->
+        preferences.isOnboardingDone = newValue
     }
     var orientationId by Delegates.observable(preferences.orientation) { _, oldValue, newValue ->
         preferences.orientation = newValue

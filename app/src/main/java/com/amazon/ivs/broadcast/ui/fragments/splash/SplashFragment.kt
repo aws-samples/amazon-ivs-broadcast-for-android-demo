@@ -4,20 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.isPermissionGranted
 import com.amazon.ivs.broadcast.common.openFragment
 import com.amazon.ivs.broadcast.databinding.FragmentSplashBinding
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SplashFragment : BaseFragment() {
 
     private lateinit var binding: FragmentSplashBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentSplashBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 

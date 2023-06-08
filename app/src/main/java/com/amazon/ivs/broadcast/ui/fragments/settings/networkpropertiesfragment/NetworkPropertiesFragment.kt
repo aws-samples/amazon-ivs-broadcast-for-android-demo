@@ -4,19 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.*
 import com.amazon.ivs.broadcast.databinding.FragmentNetworkPropertiesBinding
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class NetworkPropertiesFragment : BaseFragment() {
 
     private lateinit var binding: FragmentNetworkPropertiesBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentNetworkPropertiesBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 

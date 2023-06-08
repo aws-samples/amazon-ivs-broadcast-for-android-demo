@@ -9,20 +9,20 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.setVisible
 import com.amazon.ivs.broadcast.common.showSnackBar
 import com.amazon.ivs.broadcast.databinding.FragmentWebBinding
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class WebViewFragment : BaseFragment() {
 
     private lateinit var binding: FragmentWebBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentWebBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 

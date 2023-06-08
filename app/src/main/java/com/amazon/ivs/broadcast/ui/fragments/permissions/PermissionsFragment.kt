@@ -6,14 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.PRIVACY_POLICY_URL
 import com.amazon.ivs.broadcast.common.isPermissionGranted
 import com.amazon.ivs.broadcast.common.openFragment
 import com.amazon.ivs.broadcast.databinding.FragmentPermissionsBinding
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PermissionsFragment : BaseFragment() {
 
     private lateinit var binding: FragmentPermissionsBinding
@@ -32,7 +33,6 @@ class PermissionsFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentPermissionsBinding.inflate(inflater, container, false)
-        App.component.inject(this)
         return binding.root
     }
 
