@@ -2,34 +2,26 @@ package com.amazon.ivs.broadcast.ui.fragments.webview
 
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.setVisible
 import com.amazon.ivs.broadcast.common.showSnackBar
+import com.amazon.ivs.broadcast.common.viewBinding
 import com.amazon.ivs.broadcast.databinding.FragmentWebBinding
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
-class WebViewFragment : BaseFragment() {
-
-    private lateinit var binding: FragmentWebBinding
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentWebBinding.inflate(inflater, container, false)
-        App.component.inject(this)
-        return binding.root
-    }
+@AndroidEntryPoint
+class WebViewFragment : BaseFragment(R.layout.fragment_web) {
+    private val binding by viewBinding(FragmentWebBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.webView.webViewClient = object : WebViewClient() {
-
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 showLoading()

@@ -3,15 +3,11 @@ package com.amazon.ivs.broadcast.ui.activities
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
-import com.amazon.ivs.broadcast.App
 import com.amazon.ivs.broadcast.R
-import com.amazon.ivs.broadcast.cache.PreferenceProvider
-import com.amazon.ivs.broadcast.cache.SecuredPreferenceProvider
-import com.amazon.ivs.broadcast.common.broadcast.BroadcastManager
 import com.amazon.ivs.broadcast.common.getCurrentFragment
-import com.amazon.ivs.broadcast.common.lazyViewModel
 import com.amazon.ivs.broadcast.common.openFragment
 import com.amazon.ivs.broadcast.databinding.ActivityMainBinding
 import com.amazon.ivs.broadcast.ui.fragments.ConfigurationViewModel
@@ -23,33 +19,19 @@ import com.amazon.ivs.broadcast.ui.fragments.settings.graphicpropertiesfragment.
 import com.amazon.ivs.broadcast.ui.fragments.settings.networkpropertiesfragment.NetworkPropertiesFragment
 import com.amazon.ivs.broadcast.ui.fragments.settings.settingsfragment.SettingsFragment
 import com.amazon.ivs.broadcast.ui.fragments.splash.SplashFragment
-import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
-    @Inject lateinit var preferences: PreferenceProvider
-    @Inject lateinit var securedPreferences: SecuredPreferenceProvider
-    @Inject lateinit var broadcastManager: BroadcastManager
-
-    private lateinit var binding: ActivityMainBinding
-
-    val configurationViewModel by lazyViewModel(
-        { application as App },
-        { ConfigurationViewModel(securedPreferences, preferences) }
-    )
-
-    private val mainViewModel by lazyViewModel(
-        { application as App },
-        { MainViewModel(configurationViewModel, broadcastManager) }
-    )
+    private val configurationViewModel by viewModels<ConfigurationViewModel>()
+    private val mainViewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        App.component.inject(this)
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (preferences.isOnboardingDone) {
+        if (mainViewModel.isOnboardingDone) {
             openFragment(R.id.navigation_main)
         }
 

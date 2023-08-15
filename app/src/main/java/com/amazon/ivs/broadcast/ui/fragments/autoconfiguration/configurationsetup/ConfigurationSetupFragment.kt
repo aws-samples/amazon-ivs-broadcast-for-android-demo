@@ -1,10 +1,8 @@
 package com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.configurationsetup
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import com.amazon.ivs.broadcast.App
+import androidx.fragment.app.activityViewModels
 import com.amazon.ivs.broadcast.R
 import com.amazon.ivs.broadcast.common.*
 import com.amazon.ivs.broadcast.databinding.FragmentConfigurationSetupBinding
@@ -13,29 +11,27 @@ import com.amazon.ivs.broadcast.models.ui.PopupType
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
 import com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.AutoConfigurationViewModel
 import com.amazonaws.ivs.broadcast.BroadcastSessionTest
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
-class ConfigurationSetupFragment : BaseFragment() {
-
-    private lateinit var binding: FragmentConfigurationSetupBinding
-    private val autoConfigurationViewModel by lazyViewModel(
-        { requireActivity().application as App },
-        { AutoConfigurationViewModel() }
-    )
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentConfigurationSetupBinding.inflate(inflater, container, false)
-        App.component.inject(this)
-        return binding.root
-    }
+@AndroidEntryPoint
+class ConfigurationSetupFragment : BaseFragment(R.layout.fragment_configuration_setup) {
+    private val binding by viewBinding(FragmentConfigurationSetupBinding::bind)
+    private val autoConfigurationViewModel by activityViewModels<AutoConfigurationViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.setupIngestServerValue.text =
-            if (configurationViewModel.ingestServerUrl?.isBlank() == true) getString(R.string.not_set) else configurationViewModel.ingestServerUrl
-        binding.setupStreamKeyValue.text =
-            if (configurationViewModel.streamKey?.isBlank() == true) getString(R.string.not_set) else getString(R.string.concealed_stream_key)
+        binding.setupIngestServerValue.text = if (configurationViewModel.ingestServerUrl?.isBlank() == true) {
+            getString(R.string.not_set)
+        } else {
+            configurationViewModel.ingestServerUrl
+        }
+        binding.setupStreamKeyValue.text = if (configurationViewModel.streamKey?.isBlank() == true) {
+            getString(R.string.not_set)
+        } else {
+            getString(R.string.concealed_stream_key)
+        }
         binding.runConfiguration.isEnabled = checkIfInputsAreSet()
 
         clearPopUp()
@@ -82,14 +78,14 @@ class ConfigurationSetupFragment : BaseFragment() {
         }
 
         binding.runConfiguration.setOnClickListener {
-            autoConfigurationViewModel.isRunnedFromSettingsView = false
+            autoConfigurationViewModel.isRanFromSettingsView = false
             autoConfigurationViewModel.rerunConfiguration = true
             startTest()
         }
 
         binding.cancelConfiguration.setOnClickListener {
             autoConfigurationViewModel.stopTest()
-            if (autoConfigurationViewModel.isRunnedFromSettingsView) {
+            if (autoConfigurationViewModel.isRanFromSettingsView) {
                 openFragment(R.id.navigation_settings)
             } else {
                 binding.isTestActive = false

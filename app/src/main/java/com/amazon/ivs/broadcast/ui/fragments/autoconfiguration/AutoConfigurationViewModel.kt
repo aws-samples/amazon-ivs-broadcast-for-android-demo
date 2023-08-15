@@ -11,13 +11,15 @@ import com.amazon.ivs.broadcast.models.Recommendation
 import com.amazonaws.ivs.broadcast.BroadcastConfiguration
 import com.amazonaws.ivs.broadcast.BroadcastSession
 import com.amazonaws.ivs.broadcast.BroadcastSessionTest
+import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
+import javax.inject.Inject
 
-class AutoConfigurationViewModel : ViewModel() {
-
+@HiltViewModel
+class AutoConfigurationViewModel @Inject constructor() : ViewModel() {
     var rerunConfiguration = false
     var shouldTestContinue = true
-    var isRunnedFromSettingsView = false
+    var isRanFromSettingsView = false
 
     val testStatus = ConsumableLiveData<BroadcastSessionTest.Status>()
     val onWarningReceived = ConsumableLiveData<Unit>()

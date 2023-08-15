@@ -91,9 +91,9 @@
     <string name="manually_set_bitrate_limits">Manually set bitrate limits</string>
     <string name="minimum_bitrate">Minimum bitrate</string>
     <string name="maximum_bitrate">Maximum bitrate</string>
-    <string name="target_bitrate_description">The target bitrate (or initial bitrate) of the stream in Kbps. Must be a number between 1 and 8500.</string>
+    <string name="target_bitrate_description">The target bitrate (or initial bitrate) of the stream in Kbps. Must be a number between 100 and 8500.</string>
     <string name="maximum_bitrate_description_template">The maximum bitrate of the stream in Kbps. Must be a number between your target bitrate (%1$s) and 8500.</string>
-    <string name="minimum_bitrate_description_template">The minimum bitrate of the stream in Kbps. Must be a number between 1 and your target bitrate (%1$s).</string>
+    <string name="minimum_bitrate_description_template">The minimum bitrate of the stream in Kbps. Must be a number between 100 and your target bitrate (%1$s).</string>
     <string name="portrait">Portrait</string>
     <string name="landscape">Landscape</string>
     <string name="square">Square</string>
