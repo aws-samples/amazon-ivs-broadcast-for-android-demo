@@ -4,16 +4,21 @@ import androidx.lifecycle.ViewModel
 import com.amazon.ivs.broadcast.cache.PreferenceProvider
 import com.amazon.ivs.broadcast.cache.SecuredPreferenceProvider
 import com.amazon.ivs.broadcast.common.*
+import com.amazon.ivs.broadcast.common.broadcast.BroadcastManager
 import com.amazon.ivs.broadcast.models.Orientation
 import com.amazon.ivs.broadcast.models.Recommendation
 import com.amazon.ivs.broadcast.models.ResolutionModel
 import com.amazon.ivs.broadcast.models.ui.DeviceItem
 import com.amazonaws.ivs.broadcast.BroadcastConfiguration
 import com.amazonaws.ivs.broadcast.Device
+import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
+import javax.inject.Inject
 import kotlin.properties.Delegates
 
-class ConfigurationViewModel(
+@HiltViewModel
+class ConfigurationViewModel @Inject constructor(
+    private val broadcastManager: BroadcastManager,
     private val securedPreferences: SecuredPreferenceProvider,
     private val preferences: PreferenceProvider,
 ) : ViewModel() {
@@ -39,8 +44,9 @@ class ConfigurationViewModel(
         resolution.isLandscape = newValue
     }
     var targetBitrate by Delegates.observable(preferences.targetBitrate) { _, oldValue, newValue ->
-        preferences.targetBitrate = newValue
-        isConfigurationChanged = oldValue != newValue
+        val bitrate = newValue.takeIf { it in MIN_BPS .. MAX_BPS } ?: INITIAL_BPS
+        preferences.targetBitrate = bitrate
+        isConfigurationChanged = oldValue != bitrate
     }
     var minimumBitrate by Delegates.observable(preferences.customMinBitrate) { _, oldValue, newValue ->
         preferences.customMinBitrate = newValue
@@ -115,7 +121,9 @@ class ConfigurationViewModel(
 
     val defaultDeviceItem get() = camerasList?.firstOrNull { it.isSelected }
     val newestConfiguration get() = BroadcastConfiguration().apply {
-        video.initialBitrate = targetBitrate
+        val bitrate = targetBitrate.takeIf { it in MIN_BPS .. MAX_BPS } ?: INITIAL_BPS
+        Timber.d("Initial bitrate: $bitrate")
+        video.initialBitrate = bitrate
         video.maxBitrate = maximumBitrate
         video.minBitrate = minimumBitrate
         video.size = BroadcastConfiguration.Vec2(resolution.width, resolution.height)
@@ -160,4 +168,23 @@ class ConfigurationViewModel(
             slot
         }
     )
+
+    init {
+        broadcastManager.init(this)
+        launch {
+            broadcastManager.onDevicesListed.collect { devices ->
+                camerasList = devices
+            }
+        }
+    }
+
+    fun resetDefaultCamera() {
+        defaultCameraId = preferences.defaultCameraId
+    }
+
+    fun onConfigurationChanged(isLandscapeOrientation: Boolean) {
+        Timber.d("Configuration changed: $isLandscapeOrientation")
+        isLandscape = isLandscapeOrientation
+        broadcastManager.reloadDevices()
+    }
 }

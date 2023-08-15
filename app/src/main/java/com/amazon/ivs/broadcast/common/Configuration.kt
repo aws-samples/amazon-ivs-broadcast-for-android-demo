@@ -14,6 +14,8 @@ val slotNames = listOf(
 )
 
 const val INITIAL_BPS = 1500000
+const val MIN_BPS = 100000
+const val MAX_BPS = 8500000
 const val INITIAL_WIDTH = 720f
 const val INITIAL_HEIGHT: Float = 1280f
 const val INITIAL_FRAME_RATE: Int = 30

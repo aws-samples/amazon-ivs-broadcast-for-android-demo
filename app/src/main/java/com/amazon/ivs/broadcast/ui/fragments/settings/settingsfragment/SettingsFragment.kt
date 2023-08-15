@@ -1,47 +1,56 @@
 package com.amazon.ivs.broadcast.ui.fragments.settings.settingsfragment
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import com.amazon.ivs.broadcast.App
+import androidx.fragment.app.activityViewModels
 import com.amazon.ivs.broadcast.R
-import com.amazon.ivs.broadcast.common.*
+import com.amazon.ivs.broadcast.common.AMAZON_IVS_URL
+import com.amazon.ivs.broadcast.common.POPUP_DURATION
+import com.amazon.ivs.broadcast.common.createLinks
+import com.amazon.ivs.broadcast.common.getOrientation
+import com.amazon.ivs.broadcast.common.launchUI
+import com.amazon.ivs.broadcast.common.openFragment
+import com.amazon.ivs.broadcast.common.setVisible
+import com.amazon.ivs.broadcast.common.showCameraDialog
+import com.amazon.ivs.broadcast.common.showInputDialog
+import com.amazon.ivs.broadcast.common.toFormattedKbps
+import com.amazon.ivs.broadcast.common.viewBinding
 import com.amazon.ivs.broadcast.databinding.FragmentSettingsBinding
 import com.amazon.ivs.broadcast.models.ui.PopupModel
 import com.amazon.ivs.broadcast.models.ui.PopupType
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
 import com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.AutoConfigurationViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import timber.log.Timber
 
-class SettingsFragment : BaseFragment() {
-
-    private lateinit var binding: FragmentSettingsBinding
-    private val autoConfigurationViewModel by lazyViewModel(
-        { requireActivity().application as App },
-        { AutoConfigurationViewModel() }
-    )
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        App.component.inject(this)
-        return binding.root
-    }
+@AndroidEntryPoint
+class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
+    private val binding by viewBinding(FragmentSettingsBinding::bind)
+    private val autoConfigurationViewModel by activityViewModels<AutoConfigurationViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.orientationValue.text = configurationViewModel.orientationId.getOrientation().value
         binding.developerModeSwitch.isChecked = configurationViewModel.developerMode
-        binding.ingestServerUrlValue.text = if (configurationViewModel.ingestServerUrl.isNullOrBlank())
-            getString(R.string.not_set) else configurationViewModel.ingestServerUrl
-        binding.streamKeyValue.text = if (configurationViewModel.streamKey.isNullOrEmpty())
-            getString(R.string.not_set) else getString(R.string.concealed_stream_key)
-        binding.playbackUrlValue.text = if (configurationViewModel.playbackUrl.isNullOrEmpty())
-            getString(R.string.not_set) else configurationViewModel.playbackUrl
+        binding.ingestServerUrlValue.text = if (configurationViewModel.ingestServerUrl.isNullOrBlank()) {
+            getString(R.string.not_set)
+        } else {
+            configurationViewModel.ingestServerUrl
+        }
+        binding.streamKeyValue.text = if (configurationViewModel.streamKey.isNullOrEmpty()) {
+            getString(R.string.not_set)
+        } else {
+            getString(R.string.concealed_stream_key)
+        }
+        binding.playbackUrlValue.text = if (configurationViewModel.playbackUrl.isNullOrEmpty()) {
+            getString(R.string.not_set)
+        } else {
+            configurationViewModel.playbackUrl
+        }
 
-        configurationViewModel.defaultCameraId = preferences.defaultCameraId
+        configurationViewModel.resetDefaultCamera()
         configurationViewModel.defaultDeviceItem?.let { camera ->
             binding.defaultCameraValue.text = getString(
                 R.string.camera_option_template,
@@ -89,7 +98,7 @@ class SettingsFragment : BaseFragment() {
         }
 
         binding.autoConfig.setOnClickListener {
-            autoConfigurationViewModel.isRunnedFromSettingsView = true
+            autoConfigurationViewModel.isRanFromSettingsView = true
             autoConfigurationViewModel.rerunConfiguration = true
 
             if (binding.ingestServerUrlValue.text != getString(R.string.not_set)

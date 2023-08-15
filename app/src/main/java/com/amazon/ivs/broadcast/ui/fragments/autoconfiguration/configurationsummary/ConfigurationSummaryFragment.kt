@@ -1,32 +1,22 @@
 package com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.configurationsummary
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import com.amazon.ivs.broadcast.App
+import androidx.fragment.app.activityViewModels
 import com.amazon.ivs.broadcast.R
-import com.amazon.ivs.broadcast.common.lazyViewModel
 import com.amazon.ivs.broadcast.common.openFragment
 import com.amazon.ivs.broadcast.common.toFormattedGbPerHour
 import com.amazon.ivs.broadcast.common.toFormattedKbps
+import com.amazon.ivs.broadcast.common.viewBinding
 import com.amazon.ivs.broadcast.databinding.FragmentConfigurationSummaryBinding
 import com.amazon.ivs.broadcast.ui.fragments.BaseFragment
 import com.amazon.ivs.broadcast.ui.fragments.autoconfiguration.AutoConfigurationViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
-class ConfigurationSummaryFragment : BaseFragment() {
-
-    private lateinit var binding: FragmentConfigurationSummaryBinding
-    private val autoConfigurationViewModel by lazyViewModel(
-        { requireActivity().application as App },
-        { AutoConfigurationViewModel() }
-    )
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentConfigurationSummaryBinding.inflate(inflater, container, false)
-        App.component.inject(this)
-        return binding.root
-    }
+@AndroidEntryPoint
+class ConfigurationSummaryFragment : BaseFragment(R.layout.fragment_configuration_summary) {
+    private val binding by viewBinding(FragmentConfigurationSummaryBinding::bind)
+    private val autoConfigurationViewModel by activityViewModels<AutoConfigurationViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -45,7 +35,11 @@ class ConfigurationSummaryFragment : BaseFragment() {
 
         binding.continueToApp.setOnClickListener {
             autoConfigurationViewModel.release()
-            if (autoConfigurationViewModel.isRunnedFromSettingsView) openFragment(R.id.navigation_settings) else openFragment(R.id.navigation_main)
+            if (autoConfigurationViewModel.isRanFromSettingsView) {
+                openFragment(R.id.navigation_settings)
+            } else {
+                openFragment(R.id.navigation_main)
+            }
         }
 
         binding.rerunConfiguration.setOnClickListener {

@@ -3,16 +3,17 @@ package com.amazon.ivs.broadcast.ui.fragments.main
 import android.content.Intent
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
-import com.amazon.ivs.broadcast.common.broadcast.*
-import com.amazon.ivs.broadcast.common.launch
-import com.amazon.ivs.broadcast.ui.fragments.ConfigurationViewModel
-import timber.log.Timber
+import com.amazon.ivs.broadcast.cache.PreferenceProvider
+import com.amazon.ivs.broadcast.common.broadcast.BroadcastManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlin.properties.Delegates
 
-class MainViewModel(
-    private val configurationViewModel: ConfigurationViewModel,
-    private val broadcastManager: BroadcastManager
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val broadcastManager: BroadcastManager,
+    private val preferences: PreferenceProvider,
 ) : ViewModel() {
-
     val isCameraOff get() = broadcastManager.isVideoMuted
     val isStreamMuted get() = broadcastManager.isAudioMuted
     val isScreenShareEnabled get() = broadcastManager.isScreenShareEnabled
@@ -27,12 +28,8 @@ class MainViewModel(
     val onBroadcastState = broadcastManager.onBroadcastState
     val onStreamDataChanged = broadcastManager.onStreamDataChanged
 
-    init {
-        launch {
-            broadcastManager.onDevicesListed.collect { devices ->
-                configurationViewModel.camerasList = devices
-            }
-        }
+    var isOnboardingDone by Delegates.observable(preferences.isOnboardingDone) { _, _, isOnboardingDone ->
+        preferences.isOnboardingDone = isOnboardingDone
     }
 
     fun switchCameraDirection() = broadcastManager.flipCameraDirection()
@@ -40,12 +37,6 @@ class MainViewModel(
     fun toggleMute() = broadcastManager.toggleAudio()
 
     fun toggleCamera(bitmap: Bitmap) = broadcastManager.toggleVideo(bitmap)
-
-    fun onConfigurationChanged(isLandscape: Boolean) {
-        Timber.d("Configuration changed")
-        configurationViewModel.isLandscape = isLandscape
-        reloadDevices()
-    }
 
     fun reloadDevices() = broadcastManager.reloadDevices()
 

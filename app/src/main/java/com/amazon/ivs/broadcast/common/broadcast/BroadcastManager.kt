@@ -1,13 +1,12 @@
 package com.amazon.ivs.broadcast.common.broadcast
 
-import android.app.Application
 import android.app.Notification
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.net.TrafficStats
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.TextureView
@@ -37,8 +36,7 @@ enum class BroadcastState {
     BROADCAST_ENDED,
 }
 
-class BroadcastManager(private val context: Application) {
-
+class BroadcastManager(private val context: Context) {
     private var isBackCamera = true
     private val cameraDirection get() = if (isBackCamera) Device.Descriptor.Position.BACK else Device.Descriptor.Position.FRONT
 
@@ -333,15 +331,11 @@ class BroadcastManager(private val context: Application) {
 
     private fun createNotification(): Notification? {
         Timber.d("Creating notification")
-        var notification: Notification? = null
-        if (Build.VERSION.SDK_INT >= 26) {
-            notification = session?.createServiceNotificationBuilder(
-                NOTIFICATION_CHANNEL_ID,
-                NOTIFICATION_CHANNEL_NAME,
-                Intent(context, NotificationActivity::class.java)
-            )?.build()
-        }
-        return notification
+        return session?.createServiceNotificationBuilder(
+            NOTIFICATION_CHANNEL_ID,
+            NOTIFICATION_CHANNEL_NAME,
+            Intent(context, NotificationActivity::class.java)
+        )?.build()
     }
 
     private fun attachInitialDevices() {
