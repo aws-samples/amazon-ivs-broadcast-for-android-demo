@@ -13,14 +13,30 @@ import android.view.TextureView
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.amazon.ivs.broadcast.R
-import com.amazon.ivs.broadcast.common.*
+import com.amazon.ivs.broadcast.common.BYTES_TO_MEGABYTES_FACTOR
+import com.amazon.ivs.broadcast.common.ConsumableSharedFlow
+import com.amazon.ivs.broadcast.common.SLOT_DEFAULT
+import com.amazon.ivs.broadcast.common.asString
+import com.amazon.ivs.broadcast.common.emitNew
+import com.amazon.ivs.broadcast.common.getSessionUsedBytes
+import com.amazon.ivs.broadcast.common.launchMain
+import com.amazon.ivs.broadcast.common.slotNames
 import com.amazon.ivs.broadcast.models.ui.DeviceItem
 import com.amazon.ivs.broadcast.models.ui.StreamTopBarModel
 import com.amazon.ivs.broadcast.ui.activities.NotificationActivity
 import com.amazon.ivs.broadcast.ui.fragments.ConfigurationViewModel
-import com.amazonaws.ivs.broadcast.*
+import com.amazonaws.ivs.broadcast.BroadcastConfiguration
+import com.amazonaws.ivs.broadcast.BroadcastException
+import com.amazonaws.ivs.broadcast.BroadcastSession
+import com.amazonaws.ivs.broadcast.Device
+import com.amazonaws.ivs.broadcast.ErrorType
+import com.amazonaws.ivs.broadcast.ImageDevice
+import com.amazonaws.ivs.broadcast.SurfaceSource
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.asSharedFlow
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val NOTIFICATION_CHANNEL_ID = "notificationId"
 private const val NOTIFICATION_CHANNEL_NAME = "notificationName"
@@ -36,7 +52,10 @@ enum class BroadcastState {
     BROADCAST_ENDED,
 }
 
-class BroadcastManager(private val context: Context) {
+@Singleton
+class BroadcastManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     private var isBackCamera = true
     private val cameraDirection get() = if (isBackCamera) Device.Descriptor.Position.BACK else Device.Descriptor.Position.FRONT
 

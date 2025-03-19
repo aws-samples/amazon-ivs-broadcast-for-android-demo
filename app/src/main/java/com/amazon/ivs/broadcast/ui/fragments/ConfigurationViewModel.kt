@@ -2,9 +2,14 @@ package com.amazon.ivs.broadcast.ui.fragments
 
 import androidx.lifecycle.ViewModel
 import com.amazon.ivs.broadcast.cache.PreferenceProvider
-import com.amazon.ivs.broadcast.cache.SecuredPreferenceProvider
-import com.amazon.ivs.broadcast.common.*
+import com.amazon.ivs.broadcast.common.AMAZON_IVS_URL
+import com.amazon.ivs.broadcast.common.INITIAL_BPS
+import com.amazon.ivs.broadcast.common.MAX_BPS
+import com.amazon.ivs.broadcast.common.MIN_BPS
+import com.amazon.ivs.broadcast.common.SLOT_DEFAULT
+import com.amazon.ivs.broadcast.common.SLOT_SCREEN_SHARE
 import com.amazon.ivs.broadcast.common.broadcast.BroadcastManager
+import com.amazon.ivs.broadcast.common.launch
 import com.amazon.ivs.broadcast.models.Orientation
 import com.amazon.ivs.broadcast.models.Recommendation
 import com.amazon.ivs.broadcast.models.ResolutionModel
@@ -19,7 +24,6 @@ import kotlin.properties.Delegates
 @HiltViewModel
 class ConfigurationViewModel @Inject constructor(
     private val broadcastManager: BroadcastManager,
-    private val securedPreferences: SecuredPreferenceProvider,
     private val preferences: PreferenceProvider,
 ) : ViewModel() {
 
@@ -27,14 +31,14 @@ class ConfigurationViewModel @Inject constructor(
     var developerMode = false
     var webViewUrl = AMAZON_IVS_URL
     var camerasList: List<DeviceItem>? = null
-    var ingestServerUrl by Delegates.observable(securedPreferences.serverUrl) { _, _, newValue ->
-        securedPreferences.serverUrl = newValue
+    var ingestServerUrl by Delegates.observable(preferences.serverUrl) { _, _, newValue ->
+        preferences.serverUrl = newValue
     }
-    var streamKey by Delegates.observable(securedPreferences.streamKey) { _, _, newValue ->
-        securedPreferences.streamKey = newValue
+    var streamKey by Delegates.observable(preferences.streamKey) { _, _, newValue ->
+        preferences.streamKey = newValue
     }
-    var playbackUrl by Delegates.observable(securedPreferences.playbackUrl) { _, _, newValue ->
-        securedPreferences.playbackUrl = newValue
+    var playbackUrl by Delegates.observable(preferences.playbackUrl) { _, _, newValue ->
+        preferences.playbackUrl = newValue
     }
     var orientationId by Delegates.observable(preferences.orientation) { _, oldValue, newValue ->
         preferences.orientation = newValue
