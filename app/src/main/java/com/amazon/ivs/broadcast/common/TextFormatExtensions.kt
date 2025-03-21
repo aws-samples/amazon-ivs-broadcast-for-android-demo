@@ -61,5 +61,5 @@ fun Fragment.toFormattedKbps(bps: Int, template: Int = R.string.kbps_template) =
 private fun formatString(format: String, vararg args: Any?) = String.format(
     locale = Locale.getDefault(),
     format = format,
-    args
+    *args
 )
