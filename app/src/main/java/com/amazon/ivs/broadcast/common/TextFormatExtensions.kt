@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import com.amazon.ivs.broadcast.R
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.Locale
 
 fun Double.formatToDecimal(decimalPointCount: Int = 2): BigDecimal =
     toBigDecimal().setScale(decimalPointCount, RoundingMode.UP)
@@ -44,22 +45,21 @@ fun Fragment.formatTime(timeInSeconds: Int): String {
         resources.getString(
             R.string.stream_time_hh_mm_ss,
             4.toString(),
-            String.format("%02d", minutes),
-            String.format("%02d", seconds)
+            formatString("%02d", minutes),
+            formatString("%02d", seconds)
         )
     } else {
-        resources.getString(R.string.stream_time_mm_ss, minutes.toString(), String.format("%02d", seconds))
+        resources.getString(R.string.stream_time_mm_ss, minutes.toString(), formatString("%02d", seconds))
     }
 }
-fun Fragment.toFormattedGbPerHour(bps: Int, template: Int = R.string.gb_per_h_template) = requireContext().getString(template, (bps / BPS_TO_GBPH_FACTOR).formatToDecimal(1).toString())
+fun Fragment.toFormattedGbPerHour(bps: Int, template: Int = R.string.gb_per_h_template) =
+    context?.getString(template, (bps / BPS_TO_GBPH_FACTOR).formatToDecimal(1).toString()) ?: ""
 
-fun Fragment.toFormattedKbps(bps: Int, template: Int = R.string.kbps_template): String {
-    var formattedKbps = ""
-    try {
-        formattedKbps = requireContext().getString(template,  String.format("%,d", bps.toKbps()))
+fun Fragment.toFormattedKbps(bps: Int, template: Int = R.string.kbps_template) =
+    context?.getString(template, formatString("%,d", bps.toKbps())) ?: ""
 
-    } catch (e: NumberFormatException) {
-        /* Show error to user */
-    }
-    return formattedKbps
-}
+private fun formatString(format: String, vararg args: Any?) = String.format(
+    locale = Locale.getDefault(),
+    format = format,
+    *args
+)
