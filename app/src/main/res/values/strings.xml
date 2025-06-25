@@ -135,9 +135,6 @@
     <string name="sample_event_data">{ name: "test event" }</string>
     <string name="sample_event">Sample event</string>
     <string name="send">Send</string>
-    <string name="success">success</string>
-    <string name="sample_event_was_sent">Sample event was sent</string>
-    <string name="must_be_streaming_to_send_event">Sample event could not be sent. You must be streaming to send an event.</string>
     <string name="screen_sharing_active">Screen sharing active</string>
     <string name="screensharing_camera_note">The camera is disabled while you are sharing your screen. Stop sharing to enable it again.</string>
     <string name="stop_sharing">Stop sharing</string>

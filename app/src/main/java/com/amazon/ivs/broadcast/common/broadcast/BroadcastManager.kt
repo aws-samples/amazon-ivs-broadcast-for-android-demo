@@ -298,7 +298,7 @@ class BroadcastManager @Inject constructor(
     fun startScreenCapture(data: Intent?) {
         Timber.d("Starting screen capture")
         isScreenShareEnabled = true
-        _onScreenShareEnabled.tryEmit(isScreenShareEnabled)
+        _onScreenShareEnabled.tryEmit(true)
         slotNames.forEach { slot ->
             session?.mixer?.removeSlot(slot)?.takeIf { it }?.run {
                 Timber.d("Slot: $slot removed")
@@ -321,7 +321,7 @@ class BroadcastManager @Inject constructor(
     fun stopScreenShare() {
         Timber.d("Stopping screen capture")
         isScreenShareEnabled = false
-        _onScreenShareEnabled.tryEmit(isScreenShareEnabled)
+        _onScreenShareEnabled.tryEmit(false)
         session?.stopSystemCapture()
         slotNames.forEach { slot ->
             session?.mixer?.removeSlot(slot)

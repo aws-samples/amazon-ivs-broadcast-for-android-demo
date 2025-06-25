@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.AmazonIVSBroadcast" parent="Theme.MaterialComponents.NoActionBar">
         <!-- Primary brand color. -->
@@ -10,7 +10,7 @@
         <item name="colorSecondaryVariant">@color/broadcast_white_color</item>
         <item name="colorOnSecondary">@color/broadcast_primary_accent_color</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">@color/broadcast_primary_bg_color</item>
+        <item name="android:statusBarColor">@color/broadcast_primary_bg_color</item>
         <item name="android:navigationBarColor">@color/broadcast_primary_bg_color</item>
         <!-- Customize your theme here. -->
         <item name="android:windowBackground">@color/broadcast_primary_bg_color</item>
