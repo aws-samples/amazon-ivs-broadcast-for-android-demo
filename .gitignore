@@ -10,3 +10,4 @@ local.properties
 /.idea/
 /broadcast-debug/build/
 /broadcast-release/build/
+/.kotlin/
